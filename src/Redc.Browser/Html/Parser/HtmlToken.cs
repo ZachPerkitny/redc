@@ -6,7 +6,7 @@ namespace Redc.Browser.Html.Parser
 {
     internal class HtmlToken
     {
-        public enum HtmlTokenType
+        public enum TokenType
         {
             UNITIALIZED,
             DOCTYPE,
@@ -42,14 +42,14 @@ namespace Redc.Browser.Html.Parser
         /// <summary>
         /// 
         /// </summary>
-        public HtmlTokenType Type { get; private set; }
+        public TokenType Type { get; private set; }
 
         /// <summary>
         /// 
         /// </summary>
         public bool IsUninitialized
         {
-            get { return Type == HtmlTokenType.UNITIALIZED; }
+            get { return Type == TokenType.UNITIALIZED; }
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace Redc.Browser.Html.Parser
         {
             get
             {
-                Contract.Requires(Type == HtmlTokenType.START_TAG || Type == HtmlTokenType.END_TAG || Type == HtmlTokenType.DOCTYPE);
+                Contract.Requires(Type == TokenType.START_TAG || Type == TokenType.END_TAG || Type == TokenType.DOCTYPE);
                 return _data.ToString();
             }
         }
@@ -79,12 +79,12 @@ namespace Redc.Browser.Html.Parser
         {
             get
             {
-                Contract.Requires(Type == HtmlTokenType.DOCTYPE);
+                Contract.Requires(Type == TokenType.DOCTYPE);
                 return _doctypeData.ForceQuirks;
             }
             set
             {
-                Contract.Requires(Type == HtmlTokenType.DOCTYPE);
+                Contract.Requires(Type == TokenType.DOCTYPE);
                 _doctypeData.ForceQuirks = value;
             }
         }
@@ -96,7 +96,7 @@ namespace Redc.Browser.Html.Parser
         {
             get
             {
-                Contract.Requires(Type == HtmlTokenType.START_TAG || Type == HtmlTokenType.END_TAG);
+                Contract.Requires(Type == TokenType.START_TAG || Type == TokenType.END_TAG);
                 return _tagData.Attributes.AsReadOnly();
             }
         }
@@ -108,19 +108,19 @@ namespace Redc.Browser.Html.Parser
         {
             get
             {
-                Contract.Requires(Type == HtmlTokenType.START_TAG || Type == HtmlTokenType.END_TAG);
+                Contract.Requires(Type == TokenType.START_TAG || Type == TokenType.END_TAG);
                 return _tagData.IsSelfClosing;
             }
             set
             {
-                Contract.Requires(Type == HtmlTokenType.START_TAG || Type == HtmlTokenType.END_TAG);
+                Contract.Requires(Type == TokenType.START_TAG || Type == TokenType.END_TAG);
                 _tagData.IsSelfClosing = value;
             }
         }
 
         #endregion
 
-        #region Name Methods
+        #region Public Methods
 
         /// <summary>
         /// 
@@ -128,11 +128,29 @@ namespace Redc.Browser.Html.Parser
         /// <param name="c"></param>
         public void AppendToName(char c)
         {
-            Contract.Requires(Type == HtmlTokenType.START_TAG || Type == HtmlTokenType.END_TAG || Type == HtmlTokenType.DOCTYPE);
+            Contract.Requires(Type == TokenType.START_TAG || Type == TokenType.END_TAG || Type == TokenType.DOCTYPE);
             _data.Append(c);
         }
 
-        #endregion
+        /// <summary>
+        /// 
+        /// </summary>
+        public void MakeCharacter(char c)
+        {
+            Contract.Requires(IsUninitialized);
+            Type = TokenType.CHARACTER;
+
+            _data.Append(c);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void MakeEndOfFile()
+        {
+            Contract.Requires(IsUninitialized);
+            Type = TokenType.EOF;
+        }
 
         #region DocType Methods
 
@@ -143,7 +161,7 @@ namespace Redc.Browser.Html.Parser
         public void BeginDocType(char c)
         {
             Contract.Requires(IsUninitialized);
-            Type = HtmlTokenType.DOCTYPE;
+            Type = TokenType.DOCTYPE;
             _doctypeData = new DoctypeData();
 
             _data.Append(c);
@@ -155,7 +173,7 @@ namespace Redc.Browser.Html.Parser
         /// <param name="c"></param>
         public void AddCharacterToPublicIdentifier(char c)
         {
-            Contract.Requires(Type == HtmlTokenType.DOCTYPE);
+            Contract.Requires(Type == TokenType.DOCTYPE);
             Contract.Requires(_doctypeData.HasPublicIdentifier);
             _doctypeData.PublicIdentifier += c;
         }
@@ -166,7 +184,7 @@ namespace Redc.Browser.Html.Parser
         /// <param name="c"></param>
         public void AddCharacterToSystemIdentifier(char c)
         {
-            Contract.Requires(Type == HtmlTokenType.DOCTYPE);
+            Contract.Requires(Type == TokenType.DOCTYPE);
             Contract.Requires(_doctypeData.HasSystemIdentifier);
             _doctypeData.SystemIdentifier += c;
         }
@@ -178,26 +196,21 @@ namespace Redc.Browser.Html.Parser
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="c"></param>
-        public void BeginStartTag(char c)
+        public void BeginStartTag()
         {
             Contract.Requires(IsUninitialized);
-            Type = HtmlTokenType.START_TAG;
+            Type = TokenType.START_TAG;
             _tagData = new TagData();
-
-            _data.Append(c);
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public void BeginEndTag(char c)
+        public void BeginEndTag()
         {
             Contract.Requires(IsUninitialized);
-            Type = HtmlTokenType.END_TAG;
+            Type = TokenType.END_TAG;
             _tagData = new TagData();
-
-            _data.Append(c);
         }
 
         /// <summary>
@@ -205,7 +218,7 @@ namespace Redc.Browser.Html.Parser
         /// </summary>
         public void StartNewAttribute()
         {
-            Contract.Requires(Type == HtmlTokenType.START_TAG || Type == HtmlTokenType.END_TAG);
+            Contract.Requires(Type == TokenType.START_TAG || Type == TokenType.END_TAG);
             _tagData.Attributes.Add(new Attribute());
         }
 
@@ -215,7 +228,7 @@ namespace Redc.Browser.Html.Parser
         /// <param name="c"></param>
         public void AppendToAttributeName(char c)
         {
-            Contract.Requires(Type == HtmlTokenType.START_TAG || Type == HtmlTokenType.END_TAG);
+            Contract.Requires(Type == TokenType.START_TAG || Type == TokenType.END_TAG);
             _tagData.CurrentAttribute.AppendToName(c);
         }
 
@@ -225,41 +238,8 @@ namespace Redc.Browser.Html.Parser
         /// <param name="c"></param>
         public void AppendToAttributeValue(char c)
         {
-            Contract.Requires(Type == HtmlTokenType.START_TAG || Type == HtmlTokenType.END_TAG);
+            Contract.Requires(Type == TokenType.START_TAG || Type == TokenType.END_TAG);
             _tagData.CurrentAttribute.AppendToValue(c);
-        }
-
-        #endregion
-
-        #region Character Methods
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void EnsureCharacter()
-        {
-            Contract.Requires(IsUninitialized || Type == HtmlTokenType.CHARACTER);
-            Type = HtmlTokenType.CHARACTER;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="c"></param>
-        public void AppendToCharacter(char c)
-        {
-            Contract.Requires(Type == HtmlTokenType.CHARACTER);
-            _data.Append(c);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="str"></param>
-        public void AppendToCharacter(string str)
-        {
-            Contract.Requires(Type == HtmlTokenType.CHARACTER);
-            _data.Append(str);
         }
 
         #endregion
@@ -272,7 +252,7 @@ namespace Redc.Browser.Html.Parser
         public void BeginComment()
         {
             Contract.Requires(IsUninitialized);
-            Type = HtmlTokenType.COMMENT;
+            Type = TokenType.COMMENT;
         }
 
         /// <summary>
@@ -281,10 +261,11 @@ namespace Redc.Browser.Html.Parser
         /// <param name="c"></param>
         public void AppendToComment(char c)
         {
-            Contract.Requires(Type == HtmlTokenType.COMMENT);
+            Contract.Requires(Type == TokenType.COMMENT);
             _data.Append(c);
         }
 
+        #endregion
         #endregion
 
         #region Nested Classes

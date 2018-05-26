@@ -1,15 +1,16 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Redc.Browser.Utils;
 
 namespace Redc.Browser.Html.Parser
 {
-    internal class HtmlTokenizer
+    internal class HtmlTokenizer : Tokenizer
     {
-        private readonly string _source;
-        private int _index;
+        private readonly Queue<HtmlToken> _tokens;
 
         private readonly StringBuilder _temporaryBuffer;
+        private HtmlTokenizerState _returnState;
 
         private HtmlToken _token;
         private string _lastEmittedStartTag;
@@ -19,13 +20,14 @@ namespace Redc.Browser.Html.Parser
         /// </summary>
         /// <param name="source"></param>
         public HtmlTokenizer(string source)
+            : base(source)
         {
-            _source = source;
-            _index = 0;
-
-            State = HtmlTokenizerState.DataState;
+            // used when multiple tokens are emitted
+            _tokens = new Queue<HtmlToken>();
 
             _temporaryBuffer = new StringBuilder();
+
+            State = HtmlTokenizerState.DataState;
         }
 
         /// <summary>
@@ -39,592 +41,624 @@ namespace Redc.Browser.Html.Parser
         /// <returns></returns>
         public HtmlToken GetToken()
         {
-            _token = new HtmlToken();
-
-            switch (State)
+            while (true)
             {
-                case HtmlTokenizerState.DataState:
-                    {
-                        switch (NextCharacterInput)
-                        {
-                            case Symbols.Ampersand:
-                                ConsumeAndSetState(HtmlTokenizerState.CharcterReferenceInDataState);
-                                break;
-                            case Symbols.LessThanSign:
-                                ConsumeAndSetState(HtmlTokenizerState.TagOpenState);
-                                break;
-                            case Symbols.Null:
-                                break;
-                            case Symbols.EndOfFileMarker:
-                                break;
-                            default:
-                                ConsumeAndAppendCurrentCharacter();
-                                break;
-                            
-                        }
-                        break;
-                    }
-                case HtmlTokenizerState.CharcterReferenceInDataState:
-                    {
-                        State = HtmlTokenizerState.DataState;
-                        break;
-                    }
-                case HtmlTokenizerState.RCDATAState:
-                    {
-                        switch (NextCharacterInput)
-                        {
-                            case Symbols.Ampersand:
-                                ConsumeAndSetState(HtmlTokenizerState.CharacterReferenceInRCDATAState);
-                                break;
-                            case Symbols.LessThanSign:
-                                break;
-                            case Symbols.Null:
-                                break;
-                            case Symbols.EndOfFileMarker:
-                                break;
-                            default:
-                                break;
-                        }
-                        break;
-                    }
-                case HtmlTokenizerState.CharacterReferenceInRCDATAState:
-                    {
-                        State = HtmlTokenizerState.RCDATAState;
-                        break;
-                    }
-                case HtmlTokenizerState.RAWTEXTState:
-                    {
-                        switch (NextCharacterInput)
-                        {
-                            case Symbols.LessThanSign:
-                                break;
-                            case Symbols.Null:
-                                break;
-                            case Symbols.EndOfFileMarker:
-                                break;
-                            default:
-                                break;
-                        }
-                        break;
-                    }
-                case HtmlTokenizerState.ScriptDataState:
-                    {
-                        switch (NextCharacterInput)
-                        {
-                            case Symbols.LessThanSign:
-                                break;
-                            case Symbols.Null:
-                                break;
-                            case Symbols.EndOfFileMarker:
-                                break;
-                            default:
-                                break;
-                        }
-                        break;
-                    }
-                case HtmlTokenizerState.PLAINTEXTState:
-                    {
-                        switch (NextCharacterInput)
-                        {
-                            case Symbols.Null:
-                                break;
-                            case Symbols.EndOfFileMarker:
-                                break;
-                            default:
-                                break;
-                        }
-                        break;
-                    }
-                case HtmlTokenizerState.TagOpenState:
-                    {
-                        switch (NextCharacterInput)
-                        {
-                            case Symbols.ExclamationMark:
-                                break;
-                            case Symbols.Solidus:
-                                break;
-                            case Symbols.QuestionMark:
-                                break;
-                            case Symbols.EndOfFileMarker:
-                                break;
-                            default:
-                                if (char.IsLetter(NextCharacterInput))
-                                {
-                                    _token.BeginStartTag(NextCharacterInput);
+                // if a token was emitted last loop,
+                // or there are any left over from the
+                // last call, emit it
+                if (_tokens.Count > 0)
+                {
+                    return _tokens.Dequeue();
+                }
 
-                                }
-                                else
-                                {
+                char ch = Consume();
+
+                switch (State)
+                {
+                    // Reference: https://html.spec.whatwg.org/multipage/parsing.html#data-state
+                    case HtmlTokenizerState.DataState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.Ampersand:
+                                    _returnState = HtmlTokenizerState.DataState;
+                                    State = HtmlTokenizerState.CharcterReferenceInDataState;
+                                    break;
+                                case Symbols.LessThanSign:
+                                    State = HtmlTokenizerState.TagOpenState;
+                                    break;
+                                case Symbols.Null:
+                                    ParseError(HtmlParseErrorCode.UnexpectedNullCharacter);
+                                    EmitCharacterToken(ch);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    EmitCharacterToken(ch);
+                                    break;
+                            }
+                            break;
+                        }
+                    case HtmlTokenizerState.CharcterReferenceInDataState:
+                        {
+                            State = HtmlTokenizerState.DataState;
+                            break;
+                        }
+                    // Reference: https://html.spec.whatwg.org/multipage/parsing.html#rcdata-state
+                    case HtmlTokenizerState.RCDATAState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.Ampersand:
+                                    State = HtmlTokenizerState.CharacterReferenceInRCDATAState;
+                                    break;
+                                case Symbols.LessThanSign:
+                                    State = HtmlTokenizerState.RCDATALessThanSignState;
+                                    break;
+                                case Symbols.Null:
+                                    ParseError(HtmlParseErrorCode.UnexpectedNullCharacter);
+                                    EmitCharacterToken(Symbols.ReplacementCharacter);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    EmitCharacterToken(ch);
+                                    break;
+                            }
+                            break;
+                        }
+                    case HtmlTokenizerState.CharacterReferenceInRCDATAState:
+                        {
+                            State = HtmlTokenizerState.RCDATAState;
+                            break;
+                        }
+                    // Reference: https://html.spec.whatwg.org/multipage/parsing.html#rawtext-state
+                    case HtmlTokenizerState.RAWTEXTState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.LessThanSign:
+                                    State = HtmlTokenizerState.RAWTEXTLessThanSignState;
+                                    break;
+                                case Symbols.Null:
+                                    ParseError(HtmlParseErrorCode.UnexpectedNullCharacter);
+                                    EmitCharacterToken(Symbols.ReplacementCharacter);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    EmitCharacterToken(ch);
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://html.spec.whatwg.org/multipage/parsing.html#script-data-state
+                    case HtmlTokenizerState.ScriptDataState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.LessThanSign:
+                                    State = HtmlTokenizerState.ScriptDataLessThanSignState;
+                                    break;
+                                case Symbols.Null:
+                                    ParseError(HtmlParseErrorCode.UnexpectedNullCharacter);
+                                    EmitCharacterToken(Symbols.ReplacementCharacter);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    EmitCharacterToken(ch);
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://html.spec.whatwg.org/multipage/parsing.html#plaintext-state
+                    case HtmlTokenizerState.PLAINTEXTState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.Null:
+                                    ParseError(HtmlParseErrorCode.UnexpectedNullCharacter);
+                                    EmitCharacterToken(Symbols.ReplacementCharacter);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    EmitCharacterToken(ch);
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://html.spec.whatwg.org/multipage/parsing.html#tag-open-state
+                    case HtmlTokenizerState.TagOpenState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.ExclamationMark:
+                                    break;
+                                case Symbols.Solidus:
+                                    State = HtmlTokenizerState.EndTagOpenState;
+                                    break;
+                                case Symbols.QuestionMark:
+                                    ParseError(HtmlParseErrorCode.UnexpectedQuestionMarkInsteadOfTagName);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError(HtmlParseErrorCode.EofBeforeTagName);
+                                    EmitCharacterToken(Symbols.LessThanSign);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    if (char.IsLetter(ch))
+                                    {
+                                        _token = new HtmlToken();
+                                        _token.BeginStartTag();
+                                        ReconsumeIn(HtmlTokenizerState.TagNameState);
+                                    }
+                                    else
+                                    {
+                                        ParseError(HtmlParseErrorCode.InvalidFirstCharacterOfTagName);
+                                        EmitCharacterToken(Symbols.LessThanSign);
+                                        ReconsumeIn(HtmlTokenizerState.DataState);
+                                    }
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://html.spec.whatwg.org/multipage/parsing.html#end-tag-open-state
+                    case HtmlTokenizerState.EndTagOpenState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.GreaterThanSign:
+                                    ParseError(HtmlParseErrorCode.MissingEndTagName);
                                     State = HtmlTokenizerState.DataState;
-                                }
-                                break;
-                        }
-                        break;
-                    }
-                case HtmlTokenizerState.EndTagOpenState:
-                    {
-                        switch (NextCharacterInput)
-                        {
-                            case Symbols.GreaterThanSign:
-                                break;
-                            case Symbols.EndOfFileMarker:
-                                break;
-                            default:
-                                if (char.IsLetter(NextCharacterInput))
-                                {
-                                    _token.BeginEndTag(NextCharacterInput);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError(HtmlParseErrorCode.EofBeforeTagName);
+                                    EmitCharacterToken(Symbols.LessThanSign);
+                                    EmitCharacterToken(Symbols.Solidus);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    if (char.IsLetter(ch))
+                                    {
+                                        _token = new HtmlToken();
+                                        _token.BeginEndTag();
 
-                                }
-                                else
-                                {
-
-                                }
-                                break;
+                                        ReconsumeIn(HtmlTokenizerState.TagNameState);
+                                    }
+                                    else
+                                    {
+                                        ParseError(HtmlParseErrorCode.InvalidFirstCharacterOfTagName);
+                                    }
+                                    break;
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case HtmlTokenizerState.TagNameState:
-                    {
-                        switch (NextCharacterInput)
+                    // Reference: https://html.spec.whatwg.org/multipage/parsing.html#tag-name-state
+                    case HtmlTokenizerState.TagNameState:
                         {
-                            case Symbols.CharacterTabulation:
-                            case Symbols.LineFeed:
-                            case Symbols.FormFeed:
-                            case Symbols.Space:
-                                break;
-                            case Symbols.Solidus:
-                                break;
-                            case Symbols.GreaterThanSign:
-                                return EmitAndSetState(HtmlTokenizerState.DataState);
-                            case Symbols.Null:
-                                break;
-                            case Symbols.EndOfFileMarker:
-                                break;
-                            default:
-                                ConsumeAndAppendCurrentName();
-                                break;
-                        }
-                        break;
-                    }
-                case HtmlTokenizerState.RCDATALessThanSignState:
-                    {
-                        if (NextCharacterInput == Symbols.Solidus)
-                        {
-                            _temporaryBuffer.Clear();
-                            State = HtmlTokenizerState.RCDATAEndTagOpenState;
-                        }
-                        else
-                        {
-                            AppendCharacter(Symbols.LessThanSign);
-                            State = HtmlTokenizerState.RCDATAState;
-                        }
-                        break;
-                    }
-                case HtmlTokenizerState.RCDATAEndTagOpenState:
-                    {
-                        if (char.IsLetter(NextCharacterInput))
-                        {
-                            _token.BeginEndTag(NextCharacterInput);
-                            State = HtmlTokenizerState.RCDataEndTagNameState;
-                        }
-                        else
-                        {
-                            AppendCharacter(Symbols.LessThanSign);
-                            AppendCharacter(Symbols.Solidus);
-                            State = HtmlTokenizerState.RCDATAState;
-                        }
-                        break;
-                    }
-                case HtmlTokenizerState.RCDataEndTagNameState:
-                    {
-                        if (char.IsLetter(NextCharacterInput))
-                        {
-                            _temporaryBuffer.Append(NextCharacterInput);
-                            ConsumeAndAppendCurrentName();
-                        }
-                        else
-                        {
-                            switch (NextCharacterInput)
+                            switch (ch)
                             {
                                 case Symbols.CharacterTabulation:
                                 case Symbols.LineFeed:
                                 case Symbols.FormFeed:
                                 case Symbols.Space:
-                                    if (IsAppropriateEndTag())
-                                    {
-                                        // set state
-                                        break;
-                                    }
-                                    goto default;
+                                    break;
                                 case Symbols.Solidus:
-                                    if (IsAppropriateEndTag())
-                                    {
-                                        // set state
-                                        break;
-                                    }
-                                    goto default;
+                                    break;
                                 case Symbols.GreaterThanSign:
-                                    if (IsAppropriateEndTag())
-                                    {
-                                        State = HtmlTokenizerState.DataState;
-                                        break;
-                                    }
-                                    goto default;
+                                    State = HtmlTokenizerState.DataState;
+                                    EmitToken();
+                                    break;
+                                case Symbols.Null:
+                                    ParseError(HtmlParseErrorCode.UnexpectedNullCharacter);
+                                    _token.AppendToName(Symbols.ReplacementCharacter);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError(HtmlParseErrorCode.EofInTag);
+                                    EmitEndOfFileToken();
+                                    break;
                                 default:
-                                    AppendCharacter(Symbols.LessThanSign);
-                                    AppendCharacter(Symbols.Solidus);
-                                    _token.AppendToCharacter(_temporaryBuffer.ToString());
-                                    _temporaryBuffer.Clear();
-                                    State = HtmlTokenizerState.RCDATAState;
+                                    _token.AppendToName(char.ToLower(ch));
                                     break;
                             }
-                        }           
-                        break;
-                    }
-                case HtmlTokenizerState.RAWTEXTLessThanSignState:
-                    {
-                        if (NextCharacterInput == Symbols.Solidus)
-                        {
-                            _temporaryBuffer.Clear();
-                            ConsumeAndSetState(HtmlTokenizerState.RAWTEXTEndTagOpenState);
+                            break;
                         }
-                        else
+                    // Reference: https://html.spec.whatwg.org/multipage/parsing.html#rcdata-less-than-sign-state
+                    case HtmlTokenizerState.RCDATALessThanSignState:
                         {
-                            AppendCharacter(Symbols.LessThanSign);
-                            State = HtmlTokenizerState.RAWTEXTState;
-                        }
-                        break;
-                    }
-                case HtmlTokenizerState.RAWTEXTEndTagOpenState:
-                    {
-                        if (char.IsLower(NextCharacterInput))
-                        {
-                            _token.BeginEndTag(NextCharacterInput);
-                            ConsumeAndSetState(HtmlTokenizerState.RAWTextEndTagNameState);
-                        }
-                        else
-                        {
-                            AppendCharacter(Symbols.LessThanSign);
-                            AppendCharacter(Symbols.Solidus);
-                            State = HtmlTokenizerState.RAWTEXTState;
-                        }
-                        break;
-                    }
-                case HtmlTokenizerState.RAWTextEndTagNameState:
-                    {
-                        if (char.IsLetter(NextCharacterInput))
-                        {
-                            _temporaryBuffer.Append(NextCharacterInput);
-                            ConsumeAndAppendCurrentName();
-                        }
-                        else
-                        {
-                            switch (NextCharacterInput)
+                            if (ch == Symbols.Solidus)
                             {
-                                case Symbols.CharacterTabulation:
-                                case Symbols.LineFeed:
-                                case Symbols.FormFeed:
-                                case Symbols.Space:
-                                    if (IsAppropriateEndTag())
-                                    {
-                                        // set state
-                                        break;
-                                    }
-                                    goto default;
-                                case Symbols.Solidus:
-                                    if (IsAppropriateEndTag())
-                                    {
-                                        // set state
-                                        break;
-                                    }
-                                    goto default;
-                                case Symbols.GreaterThanSign:
-                                    if (IsAppropriateEndTag())
-                                    {
-                                        State = HtmlTokenizerState.DataState;
-                                        break;
-                                    }
-                                    goto default;
-                                default:
-                                    AppendCharacter(Symbols.LessThanSign);
-                                    AppendCharacter(Symbols.Solidus);
-                                    _token.AppendToCharacter(_temporaryBuffer.ToString());
-                                    _temporaryBuffer.Clear();
-                                    State = HtmlTokenizerState.RAWTEXTState;
-                                    break;
-                            }
-                        }
-                        break;
-                    }
-                case HtmlTokenizerState.ScriptDataLessThanSignState:
-                    {
-                        switch (NextCharacterInput)
-                        {
-                            case Symbols.Solidus:
                                 _temporaryBuffer.Clear();
-                                ConsumeAndSetState(HtmlTokenizerState.ScriptDataEndTagOpenState);
-                                break;
-                            case Symbols.ExclamationMark:
-                                AppendCharacter(Symbols.LessThanSign);
-                                AppendCharacter(Symbols.ExclamationMark);
-                                //State = 
-                                break;
-                            default:
-                                AppendCharacter(Symbols.LessThanSign);
-                                State = HtmlTokenizerState.ScriptDataState;
-                                break;
-                        }
-                        break;
-                    }
-                case HtmlTokenizerState.ScriptDataEndTagOpenState:
-                    {
-                        if (char.IsLetter(NextCharacterInput))
-                        {
-                            _token.BeginEndTag(NextCharacterInput);
-                            ConsumeAndSetState(HtmlTokenizerState.ScriptDataEndTagNameState);
-                        }
-                        else
-                        {
-                            AppendCharacter(Symbols.LessThanSign);
-                            AppendCharacter(Symbols.Solidus);
-                            State = HtmlTokenizerState.ScriptDataState;
-                        }
-                        break;
-                    }
-                case HtmlTokenizerState.ScriptDataEndTagNameState:
-                    {
-                        if (char.IsLetter(NextCharacterInput))
-                        {
-                            _temporaryBuffer.Append(NextCharacterInput);
-                            ConsumeAndAppendCurrentName();
-                        }
-                        else
-                        {
-                            switch (NextCharacterInput)
+                                State = HtmlTokenizerState.RCDATAEndTagOpenState;
+                            }
+                            else
                             {
-                                case Symbols.CharacterTabulation:
-                                case Symbols.LineFeed:
-                                case Symbols.FormFeed:
-                                case Symbols.Space:
-                                    if (IsAppropriateEndTag())
-                                    {
-                                        // set state
+                                EmitCharacterToken(Symbols.LessThanSign);
+                                ReconsumeIn(HtmlTokenizerState.RCDATAState);
+                            }
+                            break;
+                        }
+                    // Reference: https://html.spec.whatwg.org/multipage/parsing.html#rcdata-end-tag-open-state
+                    case HtmlTokenizerState.RCDATAEndTagOpenState:
+                        {
+                            if (char.IsLetter(ch))
+                            {
+                                _token = new HtmlToken();
+                                _token.BeginEndTag();
+                                ReconsumeIn(HtmlTokenizerState.RCDataEndTagNameState);
+                            }
+                            else
+                            {
+                                EmitCharacterToken(Symbols.LessThanSign);
+                                EmitCharacterToken(Symbols.Solidus);
+                                ReconsumeIn(HtmlTokenizerState.RCDATAState);
+                            }
+                            break;
+                        }
+                    // Reference: https://html.spec.whatwg.org/multipage/parsing.html#rcdata-end-tag-name-state
+                    case HtmlTokenizerState.RCDataEndTagNameState:
+                        {
+                            if (char.IsLetter(ch))
+                            {
+                                _token.AppendToName(char.ToLower(ch));
+                                _temporaryBuffer.Append(ch);
+                            }
+                            else
+                            {
+                                switch (ch)
+                                {
+                                    case Symbols.CharacterTabulation:
+                                    case Symbols.LineFeed:
+                                    case Symbols.FormFeed:
+                                    case Symbols.Space:
+                                        if (IsAppropriateEndTag())
+                                        {
+                                            // set state
+                                            break;
+                                        }
+                                        goto default;
+                                    case Symbols.Solidus:
+                                        if (IsAppropriateEndTag())
+                                        {
+                                            // set state
+                                            break;
+                                        }
+                                        goto default;
+                                    case Symbols.GreaterThanSign:
+                                        if (IsAppropriateEndTag())
+                                        {
+                                            State = HtmlTokenizerState.DataState;
+                                            break;
+                                        }
+                                        goto default;
+                                    default:
+                                        EmitCharacterToken(Symbols.LessThanSign);
+                                        EmitCharacterToken(Symbols.Solidus);
+                                        EmitTemporaryBuffer();
+                                        ReconsumeIn(HtmlTokenizerState.RCDATAState);
                                         break;
-                                    }
-                                    goto default;
+                                }
+                            }
+                            break;
+                        }
+                    // Reference: https://html.spec.whatwg.org/multipage/parsing.html#rawtext-less-than-sign-state
+                    case HtmlTokenizerState.RAWTEXTLessThanSignState:
+                        {
+                            if (ch == Symbols.Solidus)
+                            {
+                                _temporaryBuffer.Clear();
+                                State = HtmlTokenizerState.RAWTEXTEndTagOpenState;
+                            }
+                            else
+                            {
+                                EmitCharacterToken(Symbols.LessThanSign);
+                                ReconsumeIn(HtmlTokenizerState.RAWTEXTState);
+                            }
+                            break;
+                        }
+                    // Reference: https://html.spec.whatwg.org/multipage/parsing.html#rawtext-end-tag-open-state
+                    case HtmlTokenizerState.RAWTEXTEndTagOpenState:
+                        {
+                            if (char.IsLetter(ch))
+                            {
+                                _token = new HtmlToken();
+                                _token.BeginEndTag();
+                                ReconsumeIn(HtmlTokenizerState.RAWTextEndTagNameState);
+                            }
+                            else
+                            {
+                                EmitCharacterToken(Symbols.LessThanSign);
+                                EmitCharacterToken(Symbols.Solidus);
+                                ReconsumeIn(HtmlTokenizerState.RAWTEXTState);
+                            }
+                            break;
+                        }
+                    // Reference: https://html.spec.whatwg.org/multipage/parsing.html#rawtext-end-tag-name-state
+                    case HtmlTokenizerState.RAWTextEndTagNameState:
+                        {
+                            if (char.IsLetter(ch))
+                            {
+                                _token.AppendToName(char.ToLower(ch));
+                                _temporaryBuffer.Append(ch);
+                            }
+                            else
+                            {
+                                switch (ch)
+                                {
+                                    case Symbols.CharacterTabulation:
+                                    case Symbols.LineFeed:
+                                    case Symbols.FormFeed:
+                                    case Symbols.Space:
+                                        if (IsAppropriateEndTag())
+                                        {
+                                            // set state
+                                            break;
+                                        }
+                                        goto default;
+                                    case Symbols.Solidus:
+                                        if (IsAppropriateEndTag())
+                                        {
+                                            // set state
+                                            break;
+                                        }
+                                        goto default;
+                                    case Symbols.GreaterThanSign:
+                                        if (IsAppropriateEndTag())
+                                        {
+                                            State = HtmlTokenizerState.DataState;
+                                            break;
+                                        }
+                                        goto default;
+                                    default:
+                                        EmitCharacterToken(Symbols.LessThanSign);
+                                        EmitCharacterToken(Symbols.Solidus);
+                                        EmitTemporaryBuffer();
+                                        ReconsumeIn(HtmlTokenizerState.RAWTEXTState);
+                                        break;
+                                }
+                            }
+                            break;
+                        }
+                    // Reference: https://html.spec.whatwg.org/multipage/parsing.html#script-data-less-than-sign-state
+                    case HtmlTokenizerState.ScriptDataLessThanSignState:
+                        {
+                            switch (ch)
+                            {
                                 case Symbols.Solidus:
-                                    if (IsAppropriateEndTag())
-                                    {
-                                        // set state
-                                        break;
-                                    }
-                                    goto default;
-                                case Symbols.GreaterThanSign:
-                                    if (IsAppropriateEndTag())
-                                    {
-                                        State = HtmlTokenizerState.DataState;
-                                        break;
-                                    }
-                                    goto default;
-                                default:
-                                    AppendCharacter(Symbols.LessThanSign);
-                                    AppendCharacter(Symbols.Solidus);
-                                    _token.AppendToCharacter(_temporaryBuffer.ToString());
                                     _temporaryBuffer.Clear();
-                                    State = HtmlTokenizerState.ScriptDataState;
+                                    State = HtmlTokenizerState.ScriptDataEndTagOpenState;
+                                    break;
+                                case Symbols.ExclamationMark:
+                                    EmitCharacterToken(Symbols.LessThanSign);
+                                    EmitCharacterToken(Symbols.ExclamationMark);
+                                    //State = 
+                                    break;
+                                default:
+                                    EmitCharacterToken(Symbols.LessThanSign);
+                                    ReconsumeIn(HtmlTokenizerState.ScriptDataState);
                                     break;
                             }
+                            break;
                         }
-                        break;
-                    }
-                case HtmlTokenizerState.ScriptDataEscapeStartState:
-                    {
-                        if (NextCharacterInput == Symbols.HyphenMinus)
+                    // Reference: https://html.spec.whatwg.org/multipage/parsing.html#script-data-end-tag-open-state
+                    case HtmlTokenizerState.ScriptDataEndTagOpenState:
                         {
-                            ConsumeAndAppendCurrentCharacter();
-                            State = HtmlTokenizerState.ScriptDataEscapeStartDashState;
+                            if (char.IsLetter(ch))
+                            {
+                                _token = new HtmlToken();
+                                _token.BeginEndTag();
+                                ReconsumeIn(HtmlTokenizerState.ScriptDataEndTagNameState);
+                            }
+                            else
+                            {
+                                EmitCharacterToken(Symbols.LessThanSign);
+                                EmitCharacterToken(Symbols.Solidus);
+                                ReconsumeIn(HtmlTokenizerState.ScriptDataState);
+                            }
+                            break;
                         }
-                        else
+                    // Reference: https://html.spec.whatwg.org/multipage/parsing.html#script-data-end-tag-name-state
+                    case HtmlTokenizerState.ScriptDataEndTagNameState:
                         {
-                            State = HtmlTokenizerState.ScriptDataState;
+                            if (char.IsLetter(ch))
+                            {
+                                _token.AppendToName(char.ToLower(ch));
+                                _temporaryBuffer.Append(ch);
+                            }
+                            else
+                            {
+                                switch (ch)
+                                {
+                                    case Symbols.CharacterTabulation:
+                                    case Symbols.LineFeed:
+                                    case Symbols.FormFeed:
+                                    case Symbols.Space:
+                                        if (IsAppropriateEndTag())
+                                        {
+                                            // set state
+                                            break;
+                                        }
+                                        goto default;
+                                    case Symbols.Solidus:
+                                        if (IsAppropriateEndTag())
+                                        {
+                                            // set state
+                                            break;
+                                        }
+                                        goto default;
+                                    case Symbols.GreaterThanSign:
+                                        if (IsAppropriateEndTag())
+                                        {
+                                            State = HtmlTokenizerState.DataState;
+                                            break;
+                                        }
+                                        goto default;
+                                    default:
+                                        EmitCharacterToken(Symbols.LessThanSign);
+                                        EmitCharacterToken(Symbols.Solidus);
+                                        EmitTemporaryBuffer();
+                                        ReconsumeIn(HtmlTokenizerState.ScriptDataState);
+                                        break;
+                                }
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case HtmlTokenizerState.ScriptDataEscapeStartDashState:
-                    {
-                        if (NextCharacterInput == Symbols.HyphenMinus)
+                    // Reference: https://html.spec.whatwg.org/multipage/parsing.html#script-data-escape-start-state
+                    case HtmlTokenizerState.ScriptDataEscapeStartState:
                         {
-                            ConsumeAndAppendCurrentCharacter();
+                            if (ch == Symbols.HyphenMinus)
+                            {
+                                State = HtmlTokenizerState.ScriptDataEscapeStartDashState;
+                                EmitCharacterToken(Symbols.HyphenMinus);
+                            }
+                            else
+                            {
+                                ReconsumeIn(HtmlTokenizerState.ScriptDataState);
+                            }
+                            break;
                         }
-                        else
+                    // Reference: https://html.spec.whatwg.org/multipage/parsing.html#script-data-escape-start-dash-state
+                    case HtmlTokenizerState.ScriptDataEscapeStartDashState:
                         {
-                            State = HtmlTokenizerState.ScriptDataState;
-                        }
-                        break;
-                    }
-                case HtmlTokenizerState.ScriptDataEscapedState:
-                    {
-                        switch (NextCharacterInput)
-                        {
-                            case Symbols.HyphenMinus:
-                                ConsumeAndAppendCurrentCharacter();
+                            if (ch == Symbols.HyphenMinus)
+                            {
                                 State = HtmlTokenizerState.ScriptDataEscapedDashState;
-                                break;
-                            case Symbols.LessThanSign:
-                                ConsumeAndSetState(HtmlTokenizerState.ScriptDataEscapedLessThanSignState);
-                                break;
-                            case Symbols.Null:
-                                break;
-                            case Symbols.EndOfFileMarker:
-                                break;
-                            default:
-                                ConsumeAndAppendCurrentCharacter();
-                                break;
+                                EmitCharacterToken(Symbols.HyphenMinus);
+                            }
+                            else
+                            {
+                                ReconsumeIn(HtmlTokenizerState.ScriptDataState);
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case HtmlTokenizerState.ScriptDataEscapedDashState:
-                    {
-                        switch (NextCharacterInput)
+                    // Reference: https://html.spec.whatwg.org/multipage/parsing.html#script-data-escaped-state
+                    case HtmlTokenizerState.ScriptDataEscapedState:
                         {
-                            case Symbols.HyphenMinus:
-                                ConsumeAndAppendCurrentCharacter();
-                                //State = HtmlTokenizerState
-                                break;
-                            case Symbols.LessThanSign:
-                                ConsumeAndSetState(HtmlTokenizerState.ScriptDataEscapedLessThanSignState);
-                                break;
-                            case Symbols.Null:
-                                break;
-                            case Symbols.EndOfFileMarker:
-                                break;
-                            default:
-                                ConsumeAndAppendCurrentCharacter();
-                                State = HtmlTokenizerState.ScriptDataEscapedState;
-                                break;
+                            switch (ch)
+                            {
+                                case Symbols.HyphenMinus:
+                                    State = HtmlTokenizerState.ScriptDataEscapedDashState;
+                                    EmitCharacterToken(Symbols.HyphenMinus);
+                                    break;
+                                case Symbols.LessThanSign:
+                                    State = HtmlTokenizerState.ScriptDataEscapedLessThanSignState;
+                                    break;
+                                case Symbols.Null:
+                                    ParseError(HtmlParseErrorCode.UnexpectedNullCharacter);
+                                    EmitCharacterToken(Symbols.ReplacementCharacter);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError(HtmlParseErrorCode.EofInScriptHtmlCommentLikeText);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    EmitCharacterToken(ch);
+                                    break;
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case HtmlTokenizerState.ScriptDataEscapedDashDashState:
-                    {
-                        switch (NextCharacterInput)
+                    // Reference: https://html.spec.whatwg.org/multipage/parsing.html#script-data-escaped-dash-state
+                    case HtmlTokenizerState.ScriptDataEscapedDashState:
                         {
-                            case Symbols.HyphenMinus:
-                                ConsumeAndAppendCurrentCharacter();
-                                break;
-                            case Symbols.LessThanSign:
-                                ConsumeAndSetState(HtmlTokenizerState.ScriptDataEscapedLessThanSignState);
-                                break;
-                            case Symbols.GreaterThanSign:
-                                ConsumeAndAppendCurrentCharacter();
-                                State = HtmlTokenizerState.ScriptDataState;
-                                break;
-                            case Symbols.Null:
-                                break;
-                            case Symbols.EndOfFileMarker:
-                                break;
-                            default:
-                                ConsumeAndAppendCurrentCharacter();
-                                State = HtmlTokenizerState.ScriptDataEscapedState;
-                                break;
+                            switch (ch)
+                            {
+                                case Symbols.HyphenMinus:
+                                    State = HtmlTokenizerState.ScriptDataEscapedDashDashState;
+                                    EmitCharacterToken(Symbols.HyphenMinus);
+                                    break;
+                                case Symbols.LessThanSign:
+                                    State = HtmlTokenizerState.ScriptDataEscapedLessThanSignState;
+                                    break;
+                                case Symbols.Null:
+                                    ParseError(HtmlParseErrorCode.UnexpectedNullCharacter);
+                                    State = HtmlTokenizerState.ScriptDataEscapedState;
+                                    EmitCharacterToken(Symbols.ReplacementCharacter);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError(HtmlParseErrorCode.EofInScriptHtmlCommentLikeText);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    State = HtmlTokenizerState.ScriptDataEscapedState;
+                                    EmitCharacterToken(ch);
+                                    break;
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case HtmlTokenizerState.ScriptDataEscapedLessThanSignState:
-                    {
-                        if (NextCharacterInput == Symbols.Solidus)
+                    // Reference: https://html.spec.whatwg.org/multipage/parsing.html#script-data-escaped-dash-dash-state
+                    case HtmlTokenizerState.ScriptDataEscapedDashDashState:
                         {
-                            _temporaryBuffer.Clear();
-                            ConsumeAndSetState(HtmlTokenizerState.ScriptDataEscapedEndTagOpenState);
+                            switch (ch)
+                            {
+                                case Symbols.HyphenMinus:
+                                    EmitCharacterToken(Symbols.HyphenMinus);
+                                    break;
+                                case Symbols.LessThanSign:
+                                    State = HtmlTokenizerState.ScriptDataEscapedLessThanSignState;
+                                    break;
+                                case Symbols.GreaterThanSign:
+                                    State = HtmlTokenizerState.ScriptDataState;
+                                    EmitCharacterToken(Symbols.GreaterThanSign);
+                                    break;
+                                case Symbols.Null:
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    State = HtmlTokenizerState.ScriptDataEscapedState;
+                                    EmitCharacterToken(ch); 
+                                    break;
+                            }
+                            break;
                         }
-                        else if (char.IsLetter(NextCharacterInput))
+                    // Reference: https://html.spec.whatwg.org/multipage/parsing.html#script-data-escaped-less-than-sign-state
+                    case HtmlTokenizerState.ScriptDataEscapedLessThanSignState:
                         {
-                            _temporaryBuffer.Clear();
-                            AppendCharacter(Symbols.LessThanSign);
-                            //State = HtmlTokenizerState.ScriptDoubleEscapeStartState;
+                            if (ch == Symbols.Solidus)
+                            {
+                                _temporaryBuffer.Clear();
+                                State = HtmlTokenizerState.ScriptDataEscapedEndTagOpenState;
+                            }
+                            else if (char.IsLetter(ch))
+                            {
+                                _temporaryBuffer.Clear();
+                                EmitCharacterToken(Symbols.LessThanSign);
+                                //State = HtmlTokenizerState.ScriptDoubleEscapeStartState;
+                            }
+                            else
+                            {
+                                EmitCharacterToken(Symbols.LessThanSign);
+                                ReconsumeIn(HtmlTokenizerState.ScriptDataEscapedState);
+                            }
+                            break;
                         }
-                        else
+                    // Reference: https://html.spec.whatwg.org/multipage/parsing.html#script-data-escaped-end-tag-open-state
+                    case HtmlTokenizerState.ScriptDataEscapedEndTagOpenState:
                         {
-                            AppendCharacter(Symbols.LessThanSign);
-                            State = HtmlTokenizerState.ScriptDataEscapedState;
+                            if (char.IsLetter(ch))
+                            {
+                                _token = new HtmlToken();
+                                _token.BeginEndTag();
+                                ReconsumeIn(HtmlTokenizerState.ScriptDataEscapedEndTagNameState);
+                            }
+                            else
+                            {
+                                EmitCharacterToken(Symbols.LessThanSign);
+                                EmitCharacterToken(Symbols.Solidus);
+                                ReconsumeIn(HtmlTokenizerState.ScriptDataEscapedState);
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case HtmlTokenizerState.ScriptDataEscapedEndTagOpenState:
-                    {
-                        if (char.IsLetter(NextCharacterInput))
-                        {
-                            _token.BeginEndTag(NextCharacterInput);
-                            ConsumeAndSetState(HtmlTokenizerState.ScriptDataEscapedEndTagNameState);
-                        }
-                        else
-                        {
-                            AppendCharacter(Symbols.LessThanSign);
-                            AppendCharacter(Symbols.Solidus);
-                            State = HtmlTokenizerState.ScriptDataEscapedState;
-                        }
-                        break;
-                    }
+                }
             }
-
-            return null;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary> 
-        private char CurrentCharacterInput
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                return (_index < _source.Length) ? _source[_index] : Symbols.EndOfFileMarker;
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        private char NextCharacterInput
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                return (_index + 1 < _source.Length) ? _source[_index + 1] : Symbols.EndOfFileMarker;
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="c"></param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void AppendCharacter(char c)
-        {
-            _token.EnsureCharacter();
-            _token.AppendToCharacter(c);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void ConsumeAndAppendCurrentCharacter()
-        {
-            _token.EnsureCharacter();
-
-            _index++;
-            _token.AppendToCharacter(CurrentCharacterInput);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void ConsumeAndAppendCurrentName()
-        {
-            _index++;
-            _token.AppendToName(char.ToLower(CurrentCharacterInput));
         }
 
         /// <summary>
@@ -632,27 +666,57 @@ namespace Redc.Browser.Html.Parser
         /// </summary>
         /// <param name="state"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void ConsumeAndSetState(HtmlTokenizerState state)
+        private void EmitToken()
         {
-            _index++;
-            State = state;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="state"></param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private HtmlToken EmitAndSetState(HtmlTokenizerState state)
-        {
-            if (_token.Type == HtmlToken.HtmlTokenType.START_TAG)
+            if (_token.Type == HtmlToken.TokenType.START_TAG)
             {
                 _lastEmittedStartTag = _token.Name;
             }
 
-            State = state;
+            _tokens.Enqueue(_token);
+        }
 
-            return _token;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ch"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void EmitCharacterToken(char ch)
+        {
+            HtmlToken token = new HtmlToken();
+
+            token.MakeCharacter(ch);
+
+            _tokens.Enqueue(token);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void EmitEndOfFileToken()
+        {
+            HtmlToken token = new HtmlToken();
+
+            token.MakeEndOfFile();
+
+            _tokens.Enqueue(token);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void EmitTemporaryBuffer()
+        {
+            foreach (char c in _temporaryBuffer.ToString())
+            {
+                EmitCharacterToken(c);
+            }
+
+            _temporaryBuffer.Clear();
         }
 
         /// <summary>
@@ -662,8 +726,29 @@ namespace Redc.Browser.Html.Parser
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool IsAppropriateEndTag()
         {
-            return _token.Type == HtmlToken.HtmlTokenType.END_TAG &&
+            return _token.Type == HtmlToken.TokenType.END_TAG &&
                 _lastEmittedStartTag == _token.Name;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="code"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void ParseError(HtmlParseErrorCode code)
+        {
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="state"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void ReconsumeIn(HtmlTokenizerState state)
+        {
+            Back();
+            State = state;
         }
     }
 }

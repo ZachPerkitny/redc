@@ -66,5 +66,10 @@
         /// 
         /// </summary>
         public const char HyphenMinus = '\u002d';
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public const char ReplacementCharacter = '\ufffd';
     }
 }
