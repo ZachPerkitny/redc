@@ -30,6 +30,11 @@
         /// <summary>
         /// 
         /// </summary>
+        public const char EqualsSign = '\u003d';
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const char ExclamationMark = '\u0021';
 
         /// <summary>
@@ -41,6 +46,21 @@
         /// 
         /// </summary>
         public const char QuestionMark = '\u003f';
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public const char QuotationMark = '\u0022';
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public const char Apostrophe = '\u0027';
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public const char GraveAccent = '\u0060';
 
         /// <summary>
         /// 

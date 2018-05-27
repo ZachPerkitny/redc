@@ -5,10 +5,8 @@
     /// </summary>
     internal enum HtmlTokenizerState
     {
-        DataState,
-        CharcterReferenceInDataState,
+        DataState = 1,
         RCDATAState,
-        CharacterReferenceInRCDATAState,
         RAWTEXTState,
         ScriptDataState,
         PLAINTEXTState,
@@ -31,6 +29,23 @@
         ScriptDataEscapedDashDashState,
         ScriptDataEscapedLessThanSignState,
         ScriptDataEscapedEndTagOpenState,
-        ScriptDataEscapedEndTagNameState
+        ScriptDataEscapedEndTagNameState,
+        ScriptDataDoubleEscapeStartState,
+        ScriptDataDoubleEscapedState,
+        ScriptDataDoubleEscapedDashState,
+        ScriptDataDoubleEscapedDashDashState,
+        ScriptDataDoubleEscapedLessThanSignState,
+        ScriptDataDoubleEscapeEndState,
+        BeforeAttributeNameState,
+        AttributeNameState,
+        AfterAttributeNameState,
+        BeforeAttributeValueState,
+        AttributeValueDoubleQuotedState,
+        AttributeValueSingleQuotedState,
+        AttributeValueUnquotedState,
+        AfterAttributeValueQuotedState,
+        SelfClosingStartTagState,
+        BogusCommentState,
+        MarkupDeclarationOpenState
     }
 }
