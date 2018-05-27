@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
+using Redc.Browser.Html.Parser.Constants;
 using Redc.Browser.Utils;
 
 namespace Redc.Browser.Html.Parser
@@ -56,7 +58,7 @@ namespace Redc.Browser.Html.Parser
                             {
                                 case Symbols.Ampersand:
                                     returnState = HtmlTokenizerState.DataState;
-                                    //State = HtmlTokenizerState.CharacterReference;
+                                    State = HtmlTokenizerState.CharacterReferenceState;
                                     break;
                                 case Symbols.LessThanSign:
                                     State = HtmlTokenizerState.TagOpenState;
@@ -81,7 +83,7 @@ namespace Redc.Browser.Html.Parser
                             {
                                 case Symbols.Ampersand:
                                     returnState = HtmlTokenizerState.RCDATAState;
-                                    //State = HtmlTokenizerState.CharacterReference;
+                                    State = HtmlTokenizerState.CharacterReferenceState;
                                     break;
                                 case Symbols.LessThanSign:
                                     State = HtmlTokenizerState.RCDATALessThanSignState;
@@ -1025,7 +1027,7 @@ namespace Redc.Browser.Html.Parser
                                     break;
                                 case Symbols.Ampersand:
                                     returnState = HtmlTokenizerState.AttributeValueDoubleQuotedState;
-                                    //State = HtmlTokenizerState.CharacterReference;
+                                    State = HtmlTokenizerState.CharacterReferenceState;
                                     break;
                                 case Symbols.Null:
                                     ParseError();
@@ -1051,7 +1053,7 @@ namespace Redc.Browser.Html.Parser
                                     break;
                                 case Symbols.Ampersand:
                                     returnState = HtmlTokenizerState.AttributeValueSingleQuotedState;
-                                    //State = HtmlTokenizerState.CharacterReferenceState;
+                                    State = HtmlTokenizerState.CharacterReferenceState;
                                     break;
                                 case Symbols.Null:
                                     ParseError();
@@ -1080,7 +1082,7 @@ namespace Redc.Browser.Html.Parser
                                     break;
                                 case Symbols.Ampersand:
                                     returnState = HtmlTokenizerState.AttributeValueUnquotedState;
-                                    //State = HtmlTokenizerState.CharacterReferenceState;
+                                    State = HtmlTokenizerState.CharacterReferenceState;
                                     break;
                                 case Symbols.GreaterThanSign:
                                     State = HtmlTokenizerState.DataState;
@@ -1181,7 +1183,27 @@ namespace Redc.Browser.Html.Parser
                     // Reference: https://www.w3.org/TR/html5/syntax.html#markup-declaration-open-state
                     case HtmlTokenizerState.MarkupDeclarationOpenState:
                         {
-                            // TODO: Add peek ahead to tokenizer base class
+                            if (string.Equals(Peek(2), $"{Symbols.HyphenMinus}{Symbols.HyphenMinus}"))
+                            {
+                                Advance(2);
+                                State = HtmlTokenizerState.CommentStartState;
+                            }
+                            else if (string.Equals(Peek(7), HtmlTagNames.DOCTYPE, StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                Advance(7);
+                                State = HtmlTokenizerState.DOCTYPEState;
+                            }
+                            else if (string.Equals(Peek(7), "[CDATA["))
+                            {
+                                State = HtmlTokenizerState.CDATASectionState;
+                            }
+                            else
+                            {
+                                ParseError();
+                                token = new HtmlToken();
+                                token.BeginComment();
+                                ReconsumeIn(HtmlTokenizerState.BogusCommentState);
+                            }
                             break;
                         }
                     // Reference: https://www.w3.org/TR/html5/syntax.html#comment-start-state
@@ -1522,7 +1544,495 @@ namespace Redc.Browser.Html.Parser
                                     EmitEndOfFileToken();
                                     break;
                                 default:
-                                    // TODO: String Lookahead
+                                    if (string.Equals(Peek(6), "PUBLIC", StringComparison.InvariantCultureIgnoreCase))
+                                    {
+                                        Advance(6);
+                                        State = HtmlTokenizerState.AfterDOCTYPEPublicKeywordState;
+                                    }
+                                    else if (string.Equals(Peek(6), "SYSTEM", StringComparison.InvariantCultureIgnoreCase))
+                                    {
+                                        Advance(6);
+                                        State = HtmlTokenizerState.AfterDOCTYPESystemKeywordState;
+                                    }
+                                    else
+                                    {
+                                        ParseError();
+                                        token.ForceQuirks = true;
+                                        State = HtmlTokenizerState.BogusDOCTYPEState;
+                                    }
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#after-doctype-public-keyword-state
+                    case HtmlTokenizerState.AfterDOCTYPEPublicKeywordState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.CharacterTabulation:
+                                case Symbols.LineFeed:
+                                case Symbols.FormFeed:
+                                case Symbols.Space:
+                                    State = HtmlTokenizerState.BeforeDOCTYPEPublicIdentifierState;
+                                    break;
+                                case Symbols.QuotationMark:
+                                    ParseError();
+                                    token.SetPublicIdentifierToEmptyString();
+                                    State = HtmlTokenizerState.DOCTYPEPublicIdentifierDoubleQuotedState;
+                                    break;
+                                case Symbols.Apostrophe:
+                                    ParseError();
+                                    token.SetPublicIdentifierToEmptyString();
+                                    State = HtmlTokenizerState.DOCTYPEPublicIdentifierSingleQuotedState;
+                                    break;
+                                case Symbols.GreaterThanSign:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    State = HtmlTokenizerState.DataState;
+                                    EmitToken(token);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    EmitToken(token);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    State = HtmlTokenizerState.BogusDOCTYPEState;
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#before-doctype-public-identifier-state
+                    case HtmlTokenizerState.BeforeDOCTYPEPublicIdentifierState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.CharacterTabulation:
+                                case Symbols.LineFeed:
+                                case Symbols.FormFeed:
+                                case Symbols.Space:
+                                    break; // ignore it
+                                case Symbols.QuotationMark:
+                                    token.SetPublicIdentifierToEmptyString();
+                                    State = HtmlTokenizerState.DOCTYPEPublicIdentifierDoubleQuotedState;
+                                    break;
+                                case Symbols.Apostrophe:
+                                    token.SetPublicIdentifierToEmptyString();
+                                    State = HtmlTokenizerState.DOCTYPEPublicIdentifierSingleQuotedState;
+                                    break;
+                                case Symbols.GreaterThanSign:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    State = HtmlTokenizerState.DataState;
+                                    EmitToken(token);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    EmitToken(token);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    State = HtmlTokenizerState.BogusDOCTYPEState;
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#doctype-public-identifier-double-quoted-state
+                    case HtmlTokenizerState.DOCTYPEPublicIdentifierDoubleQuotedState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.QuotationMark:
+                                    State = HtmlTokenizerState.AfterDOCTYPEPublicIdentifierState;
+                                    break;
+                                case Symbols.Null:
+                                    ParseError();
+                                    token.AppendToPublicIdentifier(Symbols.ReplacementCharacter);
+                                    break;
+                                case Symbols.GreaterThanSign:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    State = HtmlTokenizerState.DataState;
+                                    EmitToken(token);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    EmitToken(token);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    token.AppendToPublicIdentifier(ch);
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#doctype-public-identifier-single-quoted-state
+                    case HtmlTokenizerState.DOCTYPEPublicIdentifierSingleQuotedState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.Apostrophe:
+                                    State = HtmlTokenizerState.AfterDOCTYPEPublicIdentifierState;
+                                    break;
+                                case Symbols.Null:
+                                    ParseError();
+                                    token.AppendToPublicIdentifier(Symbols.ReplacementCharacter);
+                                    break;
+                                case Symbols.GreaterThanSign:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    State = HtmlTokenizerState.DataState;
+                                    EmitToken(token);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    EmitToken(token);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    token.AppendToPublicIdentifier(ch);
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#after-doctype-public-identifier-state
+                    case HtmlTokenizerState.AfterDOCTYPEPublicIdentifierState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.CharacterTabulation:
+                                case Symbols.LineFeed:
+                                case Symbols.FormFeed:
+                                case Symbols.Space:
+                                    State = HtmlTokenizerState.BetweenDOCTYPEPublicAndSystemIdentifiersState;
+                                    break;
+                                case Symbols.GreaterThanSign:
+                                    State = HtmlTokenizerState.DataState;
+                                    EmitToken(token);
+                                    break;
+                                case Symbols.QuotationMark:
+                                    ParseError();
+                                    token.SetSystemIdentifierToEmptyString();
+                                    State = HtmlTokenizerState.DOCTYPESystemIdentifierDoubleQuotedState;
+                                    break;
+                                case Symbols.Apostrophe:
+                                    ParseError();
+                                    token.SetSystemIdentifierToEmptyString();
+                                    State = HtmlTokenizerState.DOCTYPESystemIdentifierSingleQuotedState;
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    EmitToken(token);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    State = HtmlTokenizerState.BogusDOCTYPEState;
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#between-doctype-public-and-system-identifiers-state
+                    case HtmlTokenizerState.BetweenDOCTYPEPublicAndSystemIdentifiersState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.CharacterTabulation:
+                                case Symbols.LineFeed:
+                                case Symbols.FormFeed:
+                                case Symbols.Space:
+                                    break; // ignore it
+                                case Symbols.GreaterThanSign:
+                                    State = HtmlTokenizerState.DataState;
+                                    EmitToken(token);
+                                    break;
+                                case Symbols.QuotationMark:
+                                    token.SetSystemIdentifierToEmptyString();
+                                    State = HtmlTokenizerState.DOCTYPESystemIdentifierDoubleQuotedState;
+                                    break;
+                                case Symbols.Apostrophe:
+                                    token.SetSystemIdentifierToEmptyString();
+                                    State = HtmlTokenizerState.DOCTYPESystemIdentifierSingleQuotedState;
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    EmitToken(token);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    State = HtmlTokenizerState.BogusDOCTYPEState;
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#after-doctype-system-keyword-state
+                    case HtmlTokenizerState.AfterDOCTYPESystemKeywordState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.CharacterTabulation:
+                                case Symbols.LineFeed:
+                                case Symbols.FormFeed:
+                                case Symbols.Space:
+                                    State = HtmlTokenizerState.BeforeDOCTYPESystemIdentifierState;
+                                    break;
+                                case Symbols.QuotationMark:
+                                    ParseError();
+                                    token.SetSystemIdentifierToEmptyString();
+                                    State = HtmlTokenizerState.DOCTYPESystemIdentifierDoubleQuotedState;
+                                    break;
+                                case Symbols.Apostrophe:
+                                    ParseError();
+                                    token.SetSystemIdentifierToEmptyString();
+                                    State = HtmlTokenizerState.DOCTYPESystemIdentifierSingleQuotedState;
+                                    break;
+                                case Symbols.GreaterThanSign:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    State = HtmlTokenizerState.DataState;
+                                    EmitToken(token);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    EmitToken(token);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    State = HtmlTokenizerState.BogusDOCTYPEState;
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#before-doctype-system-identifier-state
+                    case HtmlTokenizerState.BeforeDOCTYPESystemIdentifierState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.CharacterTabulation:
+                                case Symbols.LineFeed:
+                                case Symbols.FormFeed:
+                                case Symbols.Space:
+                                    break;
+                                case Symbols.QuotationMark:
+                                    token.SetSystemIdentifierToEmptyString();
+                                    State = HtmlTokenizerState.DOCTYPESystemIdentifierDoubleQuotedState;
+                                    break;
+                                case Symbols.Apostrophe:
+                                    token.SetSystemIdentifierToEmptyString();
+                                    State = HtmlTokenizerState.DOCTYPESystemIdentifierSingleQuotedState;
+                                    break;
+                                case Symbols.GreaterThanSign:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    State = HtmlTokenizerState.DataState;
+                                    EmitToken(token);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    EmitToken(token);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    State = HtmlTokenizerState.BogusDOCTYPEState;
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#doctype-system-identifier-double-quoted-state
+                    case HtmlTokenizerState.DOCTYPESystemIdentifierDoubleQuotedState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.QuotationMark:
+                                    State = HtmlTokenizerState.AfterDOCTYPESystemIdentifierState;
+                                    break;
+                                case Symbols.Null:
+                                    ParseError();
+                                    token.AppendToSystemIdentifier(Symbols.ReplacementCharacter);
+                                    break;
+                                case Symbols.GreaterThanSign:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    State = HtmlTokenizerState.DataState;
+                                    EmitToken(token);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    EmitToken(token);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    token.AppendToSystemIdentifier(ch);
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#doctype-system-identifier-single-quoted-state
+                    case HtmlTokenizerState.DOCTYPESystemIdentifierSingleQuotedState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.Apostrophe:
+                                    State = HtmlTokenizerState.AfterDOCTYPESystemIdentifierState;
+                                    break;
+                                case Symbols.Null:
+                                    ParseError();
+                                    token.AppendToSystemIdentifier(Symbols.ReplacementCharacter);
+                                    break;
+                                case Symbols.GreaterThanSign:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    State = HtmlTokenizerState.DataState;
+                                    EmitToken(token);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    EmitToken(token);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    token.AppendToSystemIdentifier(ch);
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#after-doctype-system-identifier-state
+                    case HtmlTokenizerState.AfterDOCTYPESystemIdentifierState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.CharacterTabulation:
+                                case Symbols.LineFeed:
+                                case Symbols.FormFeed:
+                                case Symbols.Space:
+                                    break;
+                                case Symbols.GreaterThanSign:
+                                    State = HtmlTokenizerState.DataState;
+                                    EmitToken(token);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    EmitToken(token);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    ParseError();
+                                    State = HtmlTokenizerState.BogusDOCTYPEState;
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#bogus-doctype-state
+                    case HtmlTokenizerState.BogusDOCTYPEState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.GreaterThanSign:
+                                    State = HtmlTokenizerState.DataState;
+                                    EmitToken(token);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    EmitToken(token);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#CDATA-section-state
+                    case HtmlTokenizerState.CDATASectionState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.RightSquareBracket:
+                                    State = HtmlTokenizerState.CDATASectionBracketState;
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError();
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    EmitCharacterToken(ch);
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#CDATA-section-bracket-state
+                    case HtmlTokenizerState.CDATASectionBracketState:
+                        {
+                            if (ch == Symbols.RightSquareBracket)
+                            {
+                                State = HtmlTokenizerState.CDATASectionEndState;
+                            }
+                            else
+                            {
+                                EmitCharacterToken(Symbols.RightSquareBracket);
+                                ReconsumeIn(HtmlTokenizerState.CDATASectionState);
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#CDATA-section-end-state
+                    case HtmlTokenizerState.CDATASectionEndState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.RightSquareBracket:
+                                    EmitCharacterToken(Symbols.RightSquareBracket);
+                                    break;
+                                case Symbols.GreaterThanSign:
+                                    State = HtmlTokenizerState.DataState;
+                                    break;
+                                default:
+                                    EmitCharacterToken(Symbols.RightSquareBracket);
+                                    EmitCharacterToken(Symbols.RightSquareBracket);
+                                    ReconsumeIn(HtmlTokenizerState.CDATASectionState);
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#character-reference-state
+                    case HtmlTokenizerState.CharacterReferenceState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.CharacterTabulation:
+                                case Symbols.LineFeed:
+                                case Symbols.FormFeed:
+                                case Symbols.Space:
+                                case Symbols.LessThanSign:
+                                case Symbols.Ampersand:
+                                case Symbols.EndOfFileMarker:
+                                    ReconsumeIn(HtmlTokenizerState.CharacterReferenceEndState);
+                                    break;
+                                case Symbols.NumberSign:
+                                    _temporaryBuffer.Append(ch);
+                                    State = HtmlTokenizerState.NumberCharacterReferenceState;
+                                    break;
+                                default:
+                                    // TODO: do this thing
                                     break;
                             }
                             break;

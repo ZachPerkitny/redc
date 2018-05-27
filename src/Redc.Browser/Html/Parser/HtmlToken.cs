@@ -168,7 +168,7 @@ namespace Redc.Browser.Html.Parser
         /// 
         /// </summary>
         /// <param name="c"></param>
-        public void AddCharacterToPublicIdentifier(char c)
+        public void AppendToPublicIdentifier(char c)
         {
             Contract.Requires(Type == TokenType.DOCTYPE);
             Contract.Requires(_doctypeData.HasPublicIdentifier);
@@ -179,11 +179,31 @@ namespace Redc.Browser.Html.Parser
         /// 
         /// </summary>
         /// <param name="c"></param>
-        public void AddCharacterToSystemIdentifier(char c)
+        public void AppendToSystemIdentifier(char c)
         {
             Contract.Requires(Type == TokenType.DOCTYPE);
             Contract.Requires(_doctypeData.HasSystemIdentifier);
             _doctypeData.SystemIdentifier += c;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void SetPublicIdentifierToEmptyString()
+        {
+            Contract.Requires(Type == TokenType.DOCTYPE);
+            _doctypeData.HasPublicIdentifier = true;
+            _doctypeData.PublicIdentifier = string.Empty;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void SetSystemIdentifierToEmptyString()
+        {
+            Contract.Requires(Type == TokenType.DOCTYPE);
+            _doctypeData.HasSystemIdentifier = true;
+            _doctypeData.SystemIdentifier = string.Empty;
         }
 
         #endregion

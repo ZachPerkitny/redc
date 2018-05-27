@@ -30,6 +30,11 @@
         /// <summary>
         /// 
         /// </summary>
+        public const char RightSquareBracket = '\u005d';
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const char EqualsSign = '\u003d';
 
         /// <summary>
@@ -65,6 +70,16 @@
         /// <summary>
         /// 
         /// </summary>
+        public const char HyphenMinus = '\u002d';
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public const char NumberSign = '\u0023';
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const char CharacterTabulation = '\u0009';
 
         /// <summary>
@@ -81,11 +96,6 @@
         /// 
         /// </summary>
         public const char Space = '\u0020';
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public const char HyphenMinus = '\u002d';
 
         /// <summary>
         /// 

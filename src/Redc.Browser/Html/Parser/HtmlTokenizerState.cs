@@ -60,6 +60,27 @@
         DOCTYPEState,
         BeforeDOCTYPENameState,
         DOCTYPENameState,
-        AfterDOCTYPENameState
+        AfterDOCTYPENameState,
+        AfterDOCTYPEPublicKeywordState,
+        BeforeDOCTYPEPublicIdentifierState,
+        DOCTYPEPublicIdentifierDoubleQuotedState,
+        DOCTYPEPublicIdentifierSingleQuotedState,
+        AfterDOCTYPEPublicIdentifierState,
+        BetweenDOCTYPEPublicAndSystemIdentifiersState,
+        AfterDOCTYPESystemKeywordState,
+        BeforeDOCTYPESystemIdentifierState,
+        DOCTYPESystemIdentifierDoubleQuotedState,
+        DOCTYPESystemIdentifierSingleQuotedState,
+        AfterDOCTYPESystemIdentifierState,
+        BogusDOCTYPEState,
+        CDATASectionState,
+        CDATASectionBracketState,
+        CDATASectionEndState,
+        CharacterReferenceState,
+        NumberCharacterReferenceState,
+
+
+
+        CharacterReferenceEndState
     }
 }
