@@ -1,5 +1,5 @@
 ﻿using Redc.Browser.Attributes;
-using Redc.Browser.Dom.Sets.Interfaces;
+using Redc.Browser.Dom.Collections.Interfaces;
 using Redc.Browser.Dom.Events.Interfaces;
 
 namespace Redc.Browser.Dom.Interfaces

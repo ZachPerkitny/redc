@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Redc.Browser.Dom.Interfaces;
 
 namespace Redc.Browser.Dom
 {
-    internal class ProcessingInstruction
+    internal class ProcessingInstruction : CharacterData, IProcessingInstruction
     {
-
+        /// <summary>
+        /// 
+        /// </summary>
+        public string Target { get; }
     }
 }

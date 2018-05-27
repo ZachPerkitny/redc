@@ -1,9 +1,9 @@
-﻿namespace Redc.Browser.Dom
-{
-    internal class DocumentType : Node
-    {
-        #region Ctor
+﻿using Redc.Browser.Dom.Interfaces;
 
+namespace Redc.Browser.Dom
+{
+    internal class DocumentType : Node, IDocumentType
+    {
         /// <summary>
         /// 
         /// </summary>
@@ -12,10 +12,6 @@
         {
             Name = name;
         }
-
-        #endregion
-
-        #region Public Properties
 
         /// <summary>
         /// 
@@ -31,7 +27,5 @@
         /// 
         /// </summary>
         public string SystemID { get; set; }
-
-        #endregion
     }
 }

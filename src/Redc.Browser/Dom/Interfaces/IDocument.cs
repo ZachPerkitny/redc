@@ -1,7 +1,7 @@
 ﻿using Redc.Browser.Attributes;
+using Redc.Browser.Dom.Collections.Interfaces;
 using Redc.Browser.Dom.Events.Interfaces;
 using Redc.Browser.Dom.Ranges.Interfaces;
-using Redc.Browser.Dom.Sets.Interfaces;
 using Redc.Browser.Dom.Traversal;
 using Redc.Browser.Dom.Traversal.Interfaces;
 

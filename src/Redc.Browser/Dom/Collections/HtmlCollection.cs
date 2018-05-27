@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Redc.Browser.Dom.Collections.Interfaces;
 using Redc.Browser.Dom.Interfaces;
-using Redc.Browser.Dom.Sets.Interfaces;
 
-namespace Redc.Browser.Dom.Sets
+namespace Redc.Browser.Dom.Collections
 {
     /// <summary>
     /// Collection of elements

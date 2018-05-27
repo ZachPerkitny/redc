@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Redc.Browser.Dom.Interfaces;
 
 namespace Redc.Browser.Dom
 {
-    internal class Comment
-    {
-    }
+    internal class Comment : CharacterData, IComment { }
 }

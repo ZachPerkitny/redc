@@ -1,13 +1,13 @@
-﻿namespace Redc.Browser.Dom
-{
-    internal class Attr
-    {
-        #region Public Properties
+﻿using Redc.Browser.Dom.Interfaces;
 
+namespace Redc.Browser.Dom
+{
+    internal class Attr : IAttr
+    {
         /// <summary>
         /// 
         /// </summary>
-        public string NamespaceURI { get; }
+        public string NamespaceUri { get; }
 
         /// <summary>
         /// 
@@ -36,7 +36,5 @@
         {
             get { return true; }
         }
-
-        #endregion
     }
 }
