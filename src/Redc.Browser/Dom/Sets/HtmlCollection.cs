@@ -1,16 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Redc.Browser.Dom.Interfaces;
+using Redc.Browser.Dom.Sets.Interfaces;
 
-namespace Redc.Browser.Dom.Collections
+namespace Redc.Browser.Dom.Sets
 {
     /// <summary>
     /// Collection of elements
     /// </summary>
-    internal class HTMLCollection : IEnumerable<Element>
+    internal class HtmlCollection : IHtmlCollection
     {
         #region Fields
 
-        private readonly List<Element> _elements;
+        private readonly List<IElement> _elements;
 
         #endregion
 
@@ -20,9 +22,9 @@ namespace Redc.Browser.Dom.Collections
         /// 
         /// </summary>
         /// <param name="elements"></param>
-        public HTMLCollection(IEnumerable<Element> elements)
+        public HtmlCollection(IEnumerable<IElement> elements)
         {
-            _elements = new List<Element>(elements);
+            _elements = new List<IElement>(elements);
         }
 
         #endregion
@@ -32,9 +34,9 @@ namespace Redc.Browser.Dom.Collections
         /// <summary>
         /// 
         /// </summary>
-        public IEnumerable<Element> Elements
+        public int Length
         {
-            get { return _elements.AsReadOnly(); }
+            get { return _elements.Count; }
         }
 
         /// <summary>
@@ -42,7 +44,7 @@ namespace Redc.Browser.Dom.Collections
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
-        public Element this[int index]
+        public IElement this[int index]
         {
             get { return _elements[index]; }
         }
@@ -53,12 +55,20 @@ namespace Redc.Browser.Dom.Collections
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public Element this[string name]
+        public IElement this[string name]
         {
             get
             {
                 throw new System.NotImplementedException();
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public IEnumerable<IElement> Elements
+        {
+            get { return _elements.AsReadOnly(); }
         }
 
         #endregion
@@ -69,7 +79,7 @@ namespace Redc.Browser.Dom.Collections
         /// 
         /// </summary>
         /// <returns></returns>
-        public IEnumerator<Element> GetEnumerator()
+        public IEnumerator<IElement> GetEnumerator()
         {
             return _elements.GetEnumerator();
         }

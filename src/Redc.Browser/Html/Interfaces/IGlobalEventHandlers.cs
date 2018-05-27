@@ -9,293 +9,293 @@ namespace Redc.Browser.Html.Interfaces
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Abort;
+        event EventListener Abort;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Blur;
+        event EventListener Blur;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Cancel;
+        event EventListener Cancel;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler CanPlay;
+        event EventListener CanPlay;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Change;
+        event EventListener Change;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Click;
+        event EventListener Click;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Close;
+        event EventListener Close;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler CueChange;
+        event EventListener CueChange;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler DblClick;
+        event EventListener DblClick;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Drag;
+        event EventListener Drag;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler DragEnd;
+        event EventListener DragEnd;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler DragEnter;
+        event EventListener DragEnter;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler DragExit;
+        event EventListener DragExit;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler DragLeave;
+        event EventListener DragLeave;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler DragOver;
+        event EventListener DragOver;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler DragStart;
+        event EventListener DragStart;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Drop;
+        event EventListener Drop;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler DurationChange;
+        event EventListener DurationChange;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Emptied;
+        event EventListener Emptied;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Ended;
+        event EventListener Ended;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Error;
+        event EventListener Error;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Focus;
+        event EventListener Focus;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Input;
+        event EventListener Input;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Invalid;
+        event EventListener Invalid;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Keydown;
+        event EventListener Keydown;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Keypress;
+        event EventListener Keypress;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Keyup;
+        event EventListener Keyup;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Load;
+        event EventListener Load;
         
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler LoadedData;
+        event EventListener LoadedData;
         
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler LoadedMetaData;
+        event EventListener LoadedMetaData;
         
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler LoadStart;
+        event EventListener LoadStart;
         
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler MouseDown;
+        event EventListener MouseDown;
 
         /// <summary>
         /// 
         /// </summary>
         [LenientThis]
-        event EventHandler MouseEnter;
+        event EventListener MouseEnter;
 
         /// <summary>
         /// 
         /// </summary>
         [LenientThis]
-        event EventHandler MouseLeave;
+        event EventListener MouseLeave;
         
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler MouseMove;
+        event EventListener MouseMove;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler MouseOut;
+        event EventListener MouseOut;
         
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler MouseOver;
+        event EventListener MouseOver;
         
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler MouseUp;
+        event EventListener MouseUp;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Wheel;
+        event EventListener Wheel;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Pause;
+        event EventListener Pause;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Play;
+        event EventListener Play;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Playing;
+        event EventListener Playing;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Progress;
+        event EventListener Progress;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler RateChange;
+        event EventListener RateChange;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Reset;
+        event EventListener Reset;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Resize;
+        event EventListener Resize;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Scroll;
+        event EventListener Scroll;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Seeked;
+        event EventListener Seeked;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Seeking;
+        event EventListener Seeking;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Select;
+        event EventListener Select;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Show;
+        event EventListener Show;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Stalled;
+        event EventListener Stalled;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Submit;
+        event EventListener Submit;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Suspend;
+        event EventListener Suspend;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler TimeUpdate;
+        event EventListener TimeUpdate;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Toggle;
+        event EventListener Toggle;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler VolumeChange;
+        event EventListener VolumeChange;
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler Waiting;
+        event EventListener Waiting;
     }
 }

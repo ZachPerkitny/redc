@@ -1,10 +1,13 @@
 ﻿using System.Collections.Generic;
 using Redc.Browser.Attributes;
 
-namespace Redc.Browser.Dom.Collections.Interfaces
+namespace Redc.Browser.Dom.Sets.Interfaces
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [ES("DomTokenList")]
-    internal interface IDomTokenList : IEnumerable<string>
+    public interface IDomTokenList : IEnumerable<string>
     {
         /// <summary>
         /// 

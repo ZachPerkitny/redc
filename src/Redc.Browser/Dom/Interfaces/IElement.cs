@@ -1,10 +1,13 @@
 ﻿using Redc.Browser.Attributes;
-using Redc.Browser.Dom.Collections.Interfaces;
+using Redc.Browser.Dom.Sets.Interfaces;
 
 namespace Redc.Browser.Dom.Interfaces
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [ES("Element")]
-    internal interface IElement : INode
+    public interface IElement : INode
     {
         /// <summary>
         /// 

@@ -2,17 +2,20 @@
 using Redc.Browser.Attributes;
 using Redc.Browser.Dom.Interfaces;
 
-namespace Redc.Browser.Dom.Collections.Interfaces
+namespace Redc.Browser.Dom.Sets.Interfaces
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [ES("NodeList")]
-    internal interface INodeList : IEnumerable<INode>
+    public interface INodeList : IEnumerable<INode>
     {
         /// <summary>
         /// 
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
-        [ES("this")]
+        [ES("item")]
         INode this[int index] { get; }
 
         /// <summary>

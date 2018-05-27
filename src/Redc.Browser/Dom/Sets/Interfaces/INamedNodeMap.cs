@@ -1,10 +1,13 @@
 ﻿using Redc.Browser.Attributes;
 using Redc.Browser.Dom.Interfaces;
 
-namespace Redc.Browser.Dom.Collections.Interfaces
+namespace Redc.Browser.Dom.Sets.Interfaces
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [ES("NamedNodeMap")]
-    internal interface INamedNodeMap
+    public interface INamedNodeMap
     {
         /// <summary>
         /// 

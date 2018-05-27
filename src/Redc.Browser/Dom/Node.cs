@@ -1,6 +1,6 @@
 ﻿using System;
-using Redc.Browser.Dom.Collections.Interfaces;
-using Redc.Browser.Dom.Enum;
+using Redc.Browser.Dom.Sets.Interfaces;
+using Redc.Browser.Dom.Events;
 using Redc.Browser.Dom.Interfaces;
 
 namespace Redc.Browser.Dom
@@ -52,7 +52,7 @@ namespace Redc.Browser.Dom
         /// <summary>
         /// 
         /// </summary>
-        public Element ParentElement { get; }
+        public IElement ParentElement { get; }
 
         /// <summary>
         /// 
@@ -135,7 +135,7 @@ namespace Redc.Browser.Dom
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public ushort CompareDocumentPosition(INode other)
+        public DocumentPosition CompareDocumentPosition(INode other)
         {
             throw new NotImplementedException();
         }
@@ -183,8 +183,9 @@ namespace Redc.Browser.Dom
         /// 
         /// </summary>
         /// <param name="node"></param>
+        /// <param name="child"></param>
         /// <returns></returns>
-        public INode AppendChild(INode node)
+        public INode InsertBefore(INode node, INode child = null)
         {
             throw new NotImplementedException();
         }
@@ -193,9 +194,8 @@ namespace Redc.Browser.Dom
         /// 
         /// </summary>
         /// <param name="node"></param>
-        /// <param name="child"></param>
         /// <returns></returns>
-        public INode InsertBefore(INode node, INode child = null)
+        public INode AppendChild(INode node)
         {
             throw new NotImplementedException();
         }

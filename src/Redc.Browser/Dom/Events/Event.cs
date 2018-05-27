@@ -2,7 +2,7 @@
 
 namespace Redc.Browser.Dom.Events
 {
-    internal class Event : EventArgs
+    public class Event : EventArgs
     {
     }
 }

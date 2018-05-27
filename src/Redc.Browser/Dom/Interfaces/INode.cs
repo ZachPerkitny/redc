@@ -1,6 +1,6 @@
 ﻿using Redc.Browser.Attributes;
-using Redc.Browser.Dom.Collections.Interfaces;
-using Redc.Browser.Dom.Enum;
+using Redc.Browser.Dom.Sets.Interfaces;
+using Redc.Browser.Dom.Events.Interfaces;
 
 namespace Redc.Browser.Dom.Interfaces
 {
@@ -8,7 +8,7 @@ namespace Redc.Browser.Dom.Interfaces
     /// 
     /// </summary>
     [ES("Node")]
-    interface INode : IEventTarget
+    public interface INode : IEventTarget
     {
         /// <summary>
         /// 
@@ -44,7 +44,7 @@ namespace Redc.Browser.Dom.Interfaces
         /// 
         /// </summary>
         [ES("parentElement")]
-        Element ParentElement { get; }
+        IElement ParentElement { get; }
 
         /// <summary>
         /// 
@@ -124,7 +124,7 @@ namespace Redc.Browser.Dom.Interfaces
         /// <param name="other"></param>
         /// <returns></returns>
         [ES("compareDocumentPosition")]
-        ushort CompareDocumentPosition(INode other);
+        DocumentPosition CompareDocumentPosition(INode other);
 
         /// <summary>
         /// 

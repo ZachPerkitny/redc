@@ -1,10 +1,12 @@
 ﻿using Redc.Browser.Attributes;
-using Redc.Browser.Dom.Events;
 
-namespace Redc.Browser.Dom.Interfaces
+namespace Redc.Browser.Dom.Events.Interfaces
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [ES("EventTarget")]
-    internal interface IEventTarget
+    public interface IEventTarget
     {
         /// <summary>
         /// 
@@ -13,7 +15,7 @@ namespace Redc.Browser.Dom.Interfaces
         /// <param name="callback"></param>
         /// <param name="capture"></param>
         [ES("addEventListener")]
-        void AddEventListener(string type, EventHandler callback, bool capture = false);
+        void AddEventListener(string type, EventListener callback, bool capture = false);
 
         /// <summary>
         /// 
@@ -22,7 +24,7 @@ namespace Redc.Browser.Dom.Interfaces
         /// <param name="callback"></param>
         /// <param name="capture"></param>
         [ES("removeEventListener")]
-        void RemoveEventListener(string type, EventHandler callback, bool capture = false);
+        void RemoveEventListener(string type, EventListener callback, bool capture = false);
 
         /// <summary>
         /// 
@@ -30,6 +32,6 @@ namespace Redc.Browser.Dom.Interfaces
         /// <param name="event"></param>
         /// <returns></returns>
         [ES("dispatchEvent")]
-        bool DispatchEvent(Event @event);
+        bool DispatchEvent(IEvent @event);
     }
 }

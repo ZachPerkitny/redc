@@ -1,7 +1,6 @@
-﻿using Redc.Browser.Dom.Events;
-using Redc.Browser.Dom.Interfaces;
+﻿using Redc.Browser.Dom.Events.Interfaces;
 
-namespace Redc.Browser.Dom
+namespace Redc.Browser.Dom.Events
 {
     /// <summary>
     /// 
@@ -14,7 +13,7 @@ namespace Redc.Browser.Dom
         /// <param name="type"></param>
         /// <param name="callback"></param>
         /// <param name="capture"></param>
-        public void AddEventListener(string type, EventHandler callback, bool capture = false)
+        public void AddEventListener(string type, EventListener callback, bool capture = false)
         {
             throw new System.NotImplementedException();
         }
@@ -24,7 +23,7 @@ namespace Redc.Browser.Dom
         /// </summary>
         /// <param name="event"></param>
         /// <returns></returns>
-        public bool DispatchEvent(Event @event)
+        public bool DispatchEvent(IEvent @event)
         {
             throw new System.NotImplementedException();
         }
@@ -35,7 +34,7 @@ namespace Redc.Browser.Dom
         /// <param name="type"></param>
         /// <param name="callback"></param>
         /// <param name="capture"></param>
-        public void RemoveEventListener(string type, EventHandler callback, bool capture = false)
+        public void RemoveEventListener(string type, EventListener callback, bool capture = false)
         {
             throw new System.NotImplementedException();
         }
