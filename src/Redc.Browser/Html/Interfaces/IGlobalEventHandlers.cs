@@ -4,7 +4,7 @@ using Redc.Browser.Dom.Events;
 namespace Redc.Browser.Html.Interfaces
 {
     [NoInterfaceObject]
-    internal interface IGlobalEventHandlers
+    public interface IGlobalEventHandlers
     {
         /// <summary>
         /// 

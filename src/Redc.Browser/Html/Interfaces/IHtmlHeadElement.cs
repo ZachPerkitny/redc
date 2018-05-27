@@ -5,6 +5,6 @@ namespace Redc.Browser.Html.Interfaces
     /// <summary>
     /// 
     /// </summary>
-    [ES("HTMLUnknownElement")]
-    public interface IHtmlUnknownElement : IHtmlElement { }
+    [ES("HTMLHeadElement")]
+    public interface IHtmlHeadElement : IHtmlElement { }
 }

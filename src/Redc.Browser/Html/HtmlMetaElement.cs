@@ -1,9 +1,11 @@
-﻿namespace Redc.Browser.Html
+﻿using Redc.Browser.Html.Interfaces;
+
+namespace Redc.Browser.Html
 {
     /// <summary>
     /// 
     /// </summary>
-    internal class HtmlMetaElement : HtmlElement
+    internal class HtmlMetaElement : HtmlElement, IHtmlMetaElement
     {
         /// <summary>
         /// 
@@ -13,7 +15,7 @@
         /// <summary>
         /// 
         /// </summary>
-        public string HttpEquiv { get; set; }
+        public string HttpEquivalent { get; set; }
 
         /// <summary>
         /// 

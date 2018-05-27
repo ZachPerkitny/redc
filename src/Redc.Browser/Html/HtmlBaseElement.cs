@@ -1,6 +1,8 @@
-﻿namespace Redc.Browser.Html
+﻿using Redc.Browser.Html.Interfaces;
+
+namespace Redc.Browser.Html
 {
-    internal class HtmlBaseElement : HtmlElement
+    internal class HtmlBaseElement : HtmlElement, IHtmlBaseElement
     {
         /// <summary>
         /// 

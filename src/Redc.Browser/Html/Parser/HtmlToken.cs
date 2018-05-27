@@ -157,14 +157,11 @@ namespace Redc.Browser.Html.Parser
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="c"></param>
-        public void BeginDocType(char c)
+        public void BeginDocType()
         {
             Contract.Requires(IsUninitialized);
             Type = TokenType.DOCTYPE;
             _doctypeData = new DoctypeData();
-
-            _data.Append(c);
         }
 
         /// <summary>
@@ -263,6 +260,16 @@ namespace Redc.Browser.Html.Parser
         {
             Contract.Requires(Type == TokenType.COMMENT);
             _data.Append(c);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="str"></param>
+        public void AppendToComment(string str)
+        {
+            Contract.Requires(Type == TokenType.COMMENT);
+            _data.Append(str);
         }
 
         #endregion

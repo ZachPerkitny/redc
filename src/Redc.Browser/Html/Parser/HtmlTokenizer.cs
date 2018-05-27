@@ -1178,6 +1178,355 @@ namespace Redc.Browser.Html.Parser
                             }
                             break;
                         }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#markup-declaration-open-state
+                    case HtmlTokenizerState.MarkupDeclarationOpenState:
+                        {
+                            // TODO: Add peek ahead to tokenizer base class
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#comment-start-state
+                    case HtmlTokenizerState.CommentStartState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.HyphenMinus:
+                                    State = HtmlTokenizerState.CommentStartDashState;
+                                    break;
+                                case Symbols.GreaterThanSign:
+                                    ParseError();
+                                    State = HtmlTokenizerState.DataState;
+                                    EmitToken(token);
+                                    break;
+                                default:
+                                    ReconsumeIn(HtmlTokenizerState.CommentState);
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#comment-start-dash-state
+                    case HtmlTokenizerState.CommentStartDashState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.HyphenMinus:
+                                    break;
+                                case Symbols.GreaterThanSign:
+                                    ParseError();
+                                    State = HtmlTokenizerState.DataState;
+                                    EmitToken(token);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError();
+                                    EmitToken(token);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    token.AppendToComment(ch);
+                                    ReconsumeIn(HtmlTokenizerState.CommentState);
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#comment-state
+                    case HtmlTokenizerState.CommentState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.LessThanSign:
+                                    token.AppendToComment(ch);
+                                    State = HtmlTokenizerState.CommentLessThanSignState;
+                                    break;
+                                case Symbols.HyphenMinus:
+                                    break;
+                                case Symbols.Null:
+                                    ParseError();
+                                    token.AppendToComment(Symbols.ReplacementCharacter);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError();
+                                    EmitToken(token);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    token.AppendToComment(ch);
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#comment-less-than-sign-state
+                    case HtmlTokenizerState.CommentLessThanSignState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.ExclamationMark:
+                                    token.AppendToComment(ch);
+                                    State = HtmlTokenizerState.CommentLessThanSignBangState;
+                                    break;
+                                case Symbols.LessThanSign:
+                                    token.AppendToComment(ch);
+                                    break;
+                                default:
+                                    ReconsumeIn(HtmlTokenizerState.CommentState);
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#comment-less-than-sign-bang-state
+                    case HtmlTokenizerState.CommentLessThanSignBangState:
+                        {
+                            if (ch == Symbols.HyphenMinus)
+                            {
+                                State = HtmlTokenizerState.CommentLessThanSignBangDashState;
+                            }
+                            else
+                            {
+                                ReconsumeIn(HtmlTokenizerState.CommentState);
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#comment-less-than-sign-bang-dash-state
+                    case HtmlTokenizerState.CommentLessThanSignBangDashState:
+                        {
+                            if (ch == Symbols.HyphenMinus)
+                            {
+                                State = HtmlTokenizerState.CommentLessThanSignBangDashDashState;
+                            }
+                            else
+                            {
+                                ReconsumeIn(HtmlTokenizerState.CommentEndDashState);
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#comment-less-than-sign-bang-dash-dash-state
+                    case HtmlTokenizerState.CommentLessThanSignBangDashDashState:
+                        {
+                            if (ch == Symbols.GreaterThanSign || ch == Symbols.EndOfFileMarker)
+                            {
+                                ReconsumeIn(HtmlTokenizerState.CommentEndState);
+                            }
+                            else
+                            {
+                                ParseError();
+                                ReconsumeIn(HtmlTokenizerState.CommentEndState);
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#comment-end-dash-state
+                    case HtmlTokenizerState.CommentEndDashState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.HyphenMinus:
+                                    State = HtmlTokenizerState.CommentEndState;
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError();
+                                    EmitToken(token);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    token.AppendToComment(Symbols.HyphenMinus);
+                                    ReconsumeIn(HtmlTokenizerState.CommentState);
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#comment-end-state
+                    case HtmlTokenizerState.CommentEndState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.GreaterThanSign:
+                                    State = HtmlTokenizerState.DataState;
+                                    EmitToken(token);
+                                    break;
+                                case Symbols.ExclamationMark:
+                                    State = HtmlTokenizerState.CommentEndBangState;
+                                    break;
+                                case Symbols.HyphenMinus:
+                                    token.AppendToComment(Symbols.HyphenMinus);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError();
+                                    EmitToken(token);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    token.AppendToComment(Symbols.HyphenMinus);
+                                    token.AppendToComment(Symbols.HyphenMinus);
+                                    ReconsumeIn(HtmlTokenizerState.CommentState);
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#comment-end-bang-state
+                    case HtmlTokenizerState.CommentEndBangState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.HyphenMinus:
+                                    token.AppendToComment(Symbols.HyphenMinus);
+                                    token.AppendToComment(Symbols.HyphenMinus);
+                                    token.AppendToComment(Symbols.ExclamationMark);
+                                    State = HtmlTokenizerState.CommentEndDashState;
+                                    break;
+                                case Symbols.GreaterThanSign:
+                                    ParseError();
+                                    State = HtmlTokenizerState.DataState;
+                                    EmitToken(token);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError();
+                                    EmitToken(token);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    token.AppendToComment(Symbols.HyphenMinus);
+                                    token.AppendToComment(Symbols.HyphenMinus);
+                                    token.AppendToComment(Symbols.ExclamationMark);
+                                    State = HtmlTokenizerState.CommentState;
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#doctype-state
+                    case HtmlTokenizerState.DOCTYPEState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.CharacterTabulation:
+                                case Symbols.LineFeed:
+                                case Symbols.FormFeed:
+                                case Symbols.Space:
+                                    State = HtmlTokenizerState.BeforeDOCTYPENameState;
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError();
+                                    token = new HtmlToken();
+                                    token.BeginDocType();
+                                    token.ForceQuirks = true;
+                                    EmitToken(token);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    ParseError();
+                                    ReconsumeIn(HtmlTokenizerState.BeforeDOCTYPENameState);
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#before-doctype-name-state
+                    case HtmlTokenizerState.BeforeDOCTYPENameState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.CharacterTabulation:
+                                case Symbols.LineFeed:
+                                case Symbols.FormFeed:
+                                case Symbols.Space:
+                                    break; // ignore it
+                                case Symbols.Null:
+                                    ParseError();
+                                    token = new HtmlToken();
+                                    token.BeginDocType();
+                                    token.AppendToName(Symbols.ReplacementCharacter);
+                                    State = HtmlTokenizerState.DOCTYPENameState;
+                                    break;
+                                case Symbols.GreaterThanSign:
+                                    ParseError();
+                                    token = new HtmlToken();
+                                    token.BeginDocType();
+                                    token.ForceQuirks = true;
+                                    State = HtmlTokenizerState.DataState;
+                                    EmitToken(token);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    token = new HtmlToken();
+                                    token.BeginDocType();
+                                    token.ForceQuirks = true;
+                                    EmitToken(token);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    token = new HtmlToken();
+                                    token.BeginDocType();
+                                    if (char.IsUpper(ch))
+                                    {
+                                        token.AppendToName(char.ToLower(ch));
+                                    }
+                                    else
+                                    {
+                                        token.AppendToName(ch);
+                                    }
+                                    State = HtmlTokenizerState.DOCTYPENameState;
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#doctype-name-state
+                    case HtmlTokenizerState.DOCTYPENameState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.CharacterTabulation:
+                                case Symbols.LineFeed:
+                                case Symbols.FormFeed:
+                                case Symbols.Space:
+                                    State = HtmlTokenizerState.AfterDOCTYPENameState;
+                                    break;
+                                case Symbols.GreaterThanSign:
+                                    State = HtmlTokenizerState.DataState;
+                                    EmitToken(token);
+                                    break;
+                                case Symbols.Null:
+                                    ParseError();
+                                    token.AppendToName(Symbols.ReplacementCharacter);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError();
+                                    token.ForceQuirks = true;
+                                    EmitToken(token);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    if (char.IsUpper(ch))
+                                    {
+                                        token.AppendToName(char.ToLower(ch));
+                                    }
+                                    else
+                                    {
+                                        token.AppendToName(ch);
+                                    }
+                                    break;
+                            }
+                            break;
+                        }
+                    // Reference: https://www.w3.org/TR/html5/syntax.html#after-doctype-name-state
+                    case HtmlTokenizerState.AfterDOCTYPENameState:
+                        {
+                            switch (ch)
+                            {
+                                case Symbols.CharacterTabulation:
+                                case Symbols.LineFeed:
+                                case Symbols.FormFeed:
+                                case Symbols.Space:
+                                    break; // ignore it
+                                case Symbols.GreaterThanSign:
+                                    State = HtmlTokenizerState.DataState;
+                                    EmitToken(token);
+                                    break;
+                                case Symbols.EndOfFileMarker:
+                                    ParseError();
+                                    token.ForceQuirks = true; // TODO: this will throw on next call
+                                    EmitToken(token);
+                                    EmitEndOfFileToken();
+                                    break;
+                                default:
+                                    // TODO: String Lookahead
+                                    break;
+                            }
+                            break;
+                        }
                 }
             }
 

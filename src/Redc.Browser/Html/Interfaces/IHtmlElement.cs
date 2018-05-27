@@ -6,7 +6,7 @@ namespace Redc.Browser.Html.Interfaces
     /// Basic interface that all HTML elements inherit from.
     /// </summary>
     [ES("HTMLElement")]
-    interface IHtmlElement
+    public interface IHtmlElement
     {
         /// <summary>
         /// 

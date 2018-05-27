@@ -46,6 +46,20 @@
         AfterAttributeValueQuotedState,
         SelfClosingStartTagState,
         BogusCommentState,
-        MarkupDeclarationOpenState
+        MarkupDeclarationOpenState,
+        CommentStartState,
+        CommentStartDashState,
+        CommentState,
+        CommentLessThanSignState,
+        CommentLessThanSignBangState,
+        CommentLessThanSignBangDashState,
+        CommentLessThanSignBangDashDashState,
+        CommentEndDashState,
+        CommentEndState,
+        CommentEndBangState,
+        DOCTYPEState,
+        BeforeDOCTYPENameState,
+        DOCTYPENameState,
+        AfterDOCTYPENameState
     }
 }

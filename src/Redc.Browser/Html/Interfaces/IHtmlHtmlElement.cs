@@ -6,5 +6,5 @@ namespace Redc.Browser.Html.Interfaces
     /// 
     /// </summary>
     [ES("HTMLHtmlElement")]
-    interface IHtmlHtmlElement : IHtmlElement { }
+    public interface IHtmlHtmlElement : IHtmlElement { }
 }
