@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
-using Redc.Browser.Html.Parser.Constants;
+using Redc.Browser.Html.Constants;
 using Redc.Browser.Utils;
 
 namespace Redc.Browser.Html.Parser

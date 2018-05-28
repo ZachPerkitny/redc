@@ -1,6 +1,6 @@
 ﻿using Redc.Browser.Attributes;
 using Redc.Browser.Dom.Collections.Interfaces;
-using Redc.Browser.Dom.Events.Interfaces;
+using Redc.Browser.Dom.Events;
 using Redc.Browser.Dom.Ranges.Interfaces;
 using Redc.Browser.Dom.Traversal;
 using Redc.Browser.Dom.Traversal.Interfaces;
@@ -164,7 +164,7 @@ namespace Redc.Browser.Dom.Interfaces
         /// <param name="interface"></param>
         /// <returns></returns>
         [ES("createEvent")]
-        IEvent CreateEvent(string @interface);
+        Event CreateEvent(string @interface);
 
         /// <summary>
         /// 

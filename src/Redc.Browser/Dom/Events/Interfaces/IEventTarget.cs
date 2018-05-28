@@ -15,7 +15,7 @@ namespace Redc.Browser.Dom.Events.Interfaces
         /// <param name="callback"></param>
         /// <param name="capture"></param>
         [ES("addEventListener")]
-        void AddEventListener(string type, EventListener callback, bool capture = false);
+        void AddEventListener(string type, EventHandler callback, bool capture = false);
 
         /// <summary>
         /// 
@@ -24,7 +24,7 @@ namespace Redc.Browser.Dom.Events.Interfaces
         /// <param name="callback"></param>
         /// <param name="capture"></param>
         [ES("removeEventListener")]
-        void RemoveEventListener(string type, EventListener callback, bool capture = false);
+        void RemoveEventListener(string type, EventHandler callback, bool capture = false);
 
         /// <summary>
         /// 
@@ -32,6 +32,12 @@ namespace Redc.Browser.Dom.Events.Interfaces
         /// <param name="event"></param>
         /// <returns></returns>
         [ES("dispatchEvent")]
-        bool DispatchEvent(IEvent @event);
+        bool DispatchEvent(Event @event);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="event"></param>
+        void InvokeEventListeners(Event @event);
     }
 }

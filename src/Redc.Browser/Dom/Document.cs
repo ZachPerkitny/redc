@@ -1,4 +1,5 @@
 ﻿using Redc.Browser.Dom.Collections.Interfaces;
+using Redc.Browser.Dom.Events;
 using Redc.Browser.Dom.Events.Interfaces;
 using Redc.Browser.Dom.Interfaces;
 using Redc.Browser.Dom.Ranges.Interfaces;
@@ -181,7 +182,7 @@ namespace Redc.Browser.Dom
         /// </summary>
         /// <param name="interface"></param>
         /// <returns></returns>
-        public IEvent CreateEvent(string @interface)
+        public Event CreateEvent(string @interface)
         {
             throw new System.NotImplementedException();
         }

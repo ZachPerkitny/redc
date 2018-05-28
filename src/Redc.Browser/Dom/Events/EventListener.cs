@@ -1,11 +1,14 @@
-﻿using Redc.Browser.Dom.Events.Interfaces;
-
-namespace Redc.Browser.Dom.Events
+﻿namespace Redc.Browser.Dom.Events
 {
     /// <summary>
-    /// 
+    /// Associates a callback with a specific event.
     /// </summary>
-    /// <param name="args"></param>
-    /// <param name="e"></param>
-    public delegate void EventListener(object args, IEvent e);
+    internal struct EventListener
+    {
+        public EventHandler Callback;
+
+        public string Type;
+
+        public bool Capture;
+    }
 }
