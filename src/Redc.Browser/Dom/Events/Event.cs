@@ -163,9 +163,10 @@ namespace Redc.Browser.Dom.Events
             List<IEventTarget> eventPath = new List<IEventTarget>();
             if (target is INode node)
             {
-                while (node.ParentElement != null)
+                while (node.ParentNode != null)
                 {
-                    eventPath.Add(node.ParentElement);
+                    eventPath.Add(node.ParentNode);
+                    node = node.ParentNode;
                 }
             }
 
