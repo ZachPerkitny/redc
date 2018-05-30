@@ -1,49 +1,48 @@
 ﻿using Redc.Browser.Attributes;
-using Redc.Browser.Dom.Interfaces;
 
-namespace Redc.Browser.Dom.Ranges.Interfaces
+namespace Redc.Browser.Dom.Ranges
 {
     /// <summary>
     /// 
     /// </summary>
     [ES("Range")]
-    public interface IRange
+    public class Range
     {       
         /// <summary>
         /// 
         /// </summary>
         [ES("startContainer")]
-        INode StartContainer { get; }
+        public Node StartContainer { get; }
         
         /// <summary>
         /// 
         /// </summary>
         [ES("startOffset")]
-        int StartOffset { get; }
+        public int StartOffset { get; }
         
         /// <summary>
         /// 
         /// </summary>
         [ES("endContainer")]
-        INode EndContainer { get; }
+        public Node EndContainer { get; }
         
         /// <summary>
         /// 
         /// </summary>
         [ES("endOffset")]
-        int EndOffset { get; }
+        public int EndOffset { get; }
         
         /// <summary>
         /// 
         /// </summary>
         [ES("collapsed")]
-        bool Collapsed { get; }
+        public bool Collapsed { get; }
         
         /// <summary>
         /// 
         /// </summary>
         [ES("commonAncestorContainer")]
-        INode CommonAncestorContainer { get; }
+        public Node CommonAncestorContainer { get; }
         
         /// <summary>
         /// 
@@ -51,7 +50,10 @@ namespace Redc.Browser.Dom.Ranges.Interfaces
         /// <param name="node"></param>
         /// <param name="offset"></param>
         [ES("setStart")]
-        void SetStart(INode node, int offset);
+        public void SetStart(Node node, int offset)
+        {
+            throw new System.NotImplementedException();
+        }
         
         /// <summary>
         /// 
@@ -59,56 +61,80 @@ namespace Redc.Browser.Dom.Ranges.Interfaces
         /// <param name="node"></param>
         /// <param name="offset"></param>
         [ES("setEnd")]
-        void SetEnd(INode node, int offset);
+        public void SetEnd(Node node, int offset)
+        {
+            throw new System.NotImplementedException();
+        }
         
         /// <summary>
         /// 
         /// </summary>
         /// <param name="node"></param>
         [ES("setStartBefore")]
-        void SetStartBefore(INode node);
+        public void SetStartBefore(Node node)
+        {
+            throw new System.NotImplementedException();
+        }
         
         /// <summary>
         /// 
         /// </summary>
         /// <param name="node"></param>
         [ES("setStartAfter")]
-        void SetStartAfter(INode node);
+        public void SetStartAfter(Node node)
+        {
+            throw new System.NotImplementedException();
+        }
         
         /// <summary>
         /// 
         /// </summary>
         /// <param name="node"></param>
         [ES("setEndBefore")]
-        void SetEndBefore(INode node);
+        public void SetEndBefore(Node node)
+        {
+            throw new System.NotImplementedException();
+        }
         
         /// <summary>
         /// 
         /// </summary>
         /// <param name="node"></param>
         [ES("setEndAfter")]
-        void SetEndAfter(INode node);
+        public void SetEndAfter(Node node)
+        {
+            throw new System.NotImplementedException();
+        }
         
         /// <summary>
         /// 
         /// </summary>
         /// <param name="toStart"></param>
         [ES("collapse")]
-        void Collapse(bool toStart = false);
+        public void Collapse(bool toStart = false)
+        {
+            throw new System.NotImplementedException();
+        }
         
         /// <summary>
         /// 
         /// </summary>
         /// <param name="node"></param>
         [ES("selectNode")]
-        void SelectNode(INode node);
+        public void SelectNode(Node node)
+        {
+            throw new System.NotImplementedException();
+        }
         
         /// <summary>
         /// 
         /// </summary>
         /// <param name="node"></param>
         [ES("selectNodeContents")]
-        void SelectNodeContents(INode node);
+        public void SelectNodeContents(Node node)
+        {
+            throw new System.NotImplementedException();
+        }
         
         /// <summary>
         /// 
@@ -117,54 +143,78 @@ namespace Redc.Browser.Dom.Ranges.Interfaces
         /// <param name="sourceRange"></param>
         /// <returns></returns>
         [ES("compareBoundaryPoints")]
-        short CompareBoundaryPoints(RangeType how, IRange sourceRange);
+        public short CompareBoundaryPoints(RangeType how, Range sourceRange)
+        {
+            throw new System.NotImplementedException();
+        }
         
         /// <summary>
         /// 
         /// </summary>
         [ES("deleteContents")]
-        void DeleteContents();
+        public void DeleteContents()
+        {
+            throw new System.NotImplementedException();
+        }
         
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
         [ES("extractContents")]
-        IDocumentFragment ExtractContents();
+        public DocumentFragment ExtractContents()
+        {
+            throw new System.NotImplementedException();
+        }
         
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
         [ES("cloneContents")]
-        IDocumentFragment CloneContents();
-        
+        public DocumentFragment CloneContents()
+        {
+            throw new System.NotImplementedException();
+        }
+         
         /// <summary>
         /// 
         /// </summary>
         /// <param name="node"></param>
         [ES("insertNode")]
-        void InsertNode(INode node);
+        public void InsertNode(Node node)
+        {
+            throw new System.NotImplementedException();
+        }
         
         /// <summary>
         /// 
         /// </summary>
         /// <param name="newParent"></param>
         [ES("surroundContents")]
-        void SurroundContents(INode newParent);
+        public void SurroundContents(Node newParent)
+        {
+            throw new System.NotImplementedException();
+        }
         
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
         [ES("cloneRange")]
-        IRange CloneRange();
+        public Range CloneRange()
+        {
+            throw new System.NotImplementedException();
+        }
         
         /// <summary>
         /// 
         /// </summary>
         [ES("detach")]
-        void Detach();
+        public void Detach()
+        {
+            throw new System.NotImplementedException();
+        }
         
         /// <summary>
         /// 
@@ -173,7 +223,10 @@ namespace Redc.Browser.Dom.Ranges.Interfaces
         /// <param name="offset"></param>
         /// <returns></returns>
         [ES("isPointInRange")]
-        bool IsPointInRange(INode node, int offset);
+        public bool IsPointInRange(Node node, int offset)
+        {
+            throw new System.NotImplementedException();
+        }
         
         /// <summary>
         /// 
@@ -182,7 +235,10 @@ namespace Redc.Browser.Dom.Ranges.Interfaces
         /// <param name="offset"></param>
         /// <returns></returns>
         [ES("comparePoint")]
-        short ComparePoint(INode node, int offset);
+        public short ComparePoint(Node node, int offset)
+        {
+            throw new System.NotImplementedException();
+        }
         
         /// <summary>
         /// 
@@ -190,6 +246,9 @@ namespace Redc.Browser.Dom.Ranges.Interfaces
         /// <param name="node"></param>
         /// <returns></returns>
         [ES("intersectsNode")]
-        bool IntersectsNode(INode node);
+        public bool IntersectsNode(Node node)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

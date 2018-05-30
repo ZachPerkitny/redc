@@ -1,10 +1,10 @@
 ﻿using Redc.Browser.Attributes;
 
-namespace Redc.Browser.Html.Interfaces
+namespace Redc.Browser.Html
 {
     /// <summary>
     /// 
     /// </summary>
     [ES("HTMLBodyElement")]
-    interface IHtmlBodyElement : IHtmlElement, IWindowEventHandlers { }
+    public class HtmlBodyElement : HtmlElement { }
 }

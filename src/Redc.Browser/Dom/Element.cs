@@ -1,5 +1,5 @@
-﻿using Redc.Browser.Dom.Collections.Interfaces;
-using Redc.Browser.Dom.Interfaces;
+﻿using Redc.Browser.Attributes;
+using Redc.Browser.Dom.Collections;
 using Redc.Browser.Dom.Sets.Interfaces;
 
 namespace Redc.Browser.Dom
@@ -7,49 +7,66 @@ namespace Redc.Browser.Dom
     /// <summary>
     /// 
     /// </summary>
-    internal class Element : Node, IElement
+    [ES("Element")]
+    public class Element : Node
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="name"></param>
+        public Element(Document owner, string name)
+            : base(owner, name, NodeType.Element) { }
+
         #region Public Properties
 
         /// <summary>
         /// 
         /// </summary>
+        [ES("namespaceURI")]
         public string NamespaceUri { get; }
 
         /// <summary>
         /// 
         /// </summary>
+        [ES("prefix")]
         public string Prefix { get; }
 
         /// <summary>
         /// 
         /// </summary>
+        [ES("localName")]
         public string LocalName { get; }
 
         /// <summary>
         /// 
         /// </summary>
+        [ES("tagName")]
         public string TagName { get; }
 
         /// <summary>
         /// 
         /// </summary>
+        [ES("id")]
         public string ID { get; }
 
         /// <summary>
         /// 
         /// </summary>
+        [ES("className")]
         public string ClassName { get; }
 
         /// <summary>
         /// 
         /// </summary>
-        public IDomTokenList ClassList { get; }
+        [ES("classList")]
+        public DomTokenList ClassList { get; }
 
         /// <summary>
         /// 
         /// </summary>
-        public INamedNodeMap Attributes { get; }
+        [ES("attributes")]
+        public NamedNodeMap Attributes { get; }
 
         #endregion
 
@@ -60,6 +77,7 @@ namespace Redc.Browser.Dom
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
+        [ES("getAttribute")]
         public string GetAttribute(string name)
         {
             throw new System.NotImplementedException();
@@ -71,6 +89,7 @@ namespace Redc.Browser.Dom
         /// <param name="namespace"></param>
         /// <param name="localName"></param>
         /// <returns></returns>
+        [ES("getAttributeNS")]
         public string GetAttributeNS(string @namespace, string localName)
         {
             throw new System.NotImplementedException();
@@ -80,6 +99,7 @@ namespace Redc.Browser.Dom
         /// 
         /// </summary>
         /// <param name="name"></param>
+        [ES("setAttribute")]
         public void SetAttribute(string name)
         {
             throw new System.NotImplementedException();
@@ -91,6 +111,7 @@ namespace Redc.Browser.Dom
         /// <param name="namespace"></param>
         /// <param name="name"></param>
         /// <param name="value"></param>
+        [ES("setAttributeNS")]
         public void SetAttributeNS(string @namespace, string name, string value)
         {
             throw new System.NotImplementedException();
@@ -100,6 +121,7 @@ namespace Redc.Browser.Dom
         /// 
         /// </summary>
         /// <param name="name"></param>
+        [ES("removeAttribute")]
         public void RemoveAttribute(string name)
         {
             throw new System.NotImplementedException();
@@ -110,6 +132,7 @@ namespace Redc.Browser.Dom
         /// </summary>
         /// <param name="namespace"></param>
         /// <param name="localName"></param>
+        [ES("removeAttributeNS")]
         public void RemoveAttributeNS(string @namespace, string localName)
         {
             throw new System.NotImplementedException();
@@ -120,7 +143,8 @@ namespace Redc.Browser.Dom
         /// </summary>
         /// <param name="localName"></param>
         /// <returns></returns>
-        public IHtmlCollection GetElementsByTagName(string localName)
+        [ES("getElementsByTagName")]
+        public HtmlCollection GetElementsByTagName(string localName)
         {
             throw new System.NotImplementedException();
         }
@@ -131,7 +155,8 @@ namespace Redc.Browser.Dom
         /// <param name="namespace"></param>
         /// <param name="localName"></param>
         /// <returns></returns>
-        public IHtmlCollection GetElementsByTagNameNS(string @namespace, string localName)
+        [ES("getElementsByTagNameNS")]
+        public HtmlCollection GetElementsByTagNameNS(string @namespace, string localName)
         {
             throw new System.NotImplementedException();
         }
@@ -141,7 +166,8 @@ namespace Redc.Browser.Dom
         /// </summary>
         /// <param name="classNames"></param>
         /// <returns></returns>
-        public IHtmlCollection GetElementsByClassName(string classNames)
+        [ES("getElementsByClassName")]
+        public HtmlCollection GetElementsByClassName(string classNames)
         {
             throw new System.NotImplementedException();
         }

@@ -1,56 +1,64 @@
 ﻿using Redc.Browser.Attributes;
-using Redc.Browser.Dom.Interfaces;
 
-namespace Redc.Browser.Dom.Traversal.Interfaces
+namespace Redc.Browser.Dom.Traversal
 {
     /// <summary>
     /// 
     /// </summary>
     [ES("NodeIterator")]
-    public interface INodeIterator
+    public class NodeIterator
     {
         /// <summary>
         /// 
         /// </summary>
         [ES("root")]
-        INode Root { get; }
+        public Node Root { get; }
 
         /// <summary>
         /// 
         /// </summary>
         [ES("pointerBeforeReferenceNode")]
-        bool PointerBeforeReferenceNode { get; }
+        public bool PointerBeforeReferenceNode { get; }
 
         /// <summary>
         /// 
         /// </summary>
         [ES("whatToShow")]
-        FilterSettings FilterSettings { get; }
+        public FilterSettings FilterSettings { get; }
 
         /// <summary>
         /// 
         /// </summary>
         [ES("filter")]
-        NodeFilter Filter { get; }
+        public NodeFilter Filter { get; }
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
         [ES("nextNode")]
-        INode NextNode();
+        public Node NextNode()
+        {
+            throw new System.NotImplementedException();
+        }
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
         [ES("previousNode")]
-        INode PreviousNode();
+        public Node PreviousNode()
+        {
+            throw new System.NotImplementedException();
+        }
 
         /// <summary>
         /// 
         /// </summary>
         [ES("detach")]
-        void Detach();
+        public void Detach()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

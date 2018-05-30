@@ -1,12 +1,14 @@
-﻿using Redc.Browser.Dom.Interfaces;
+﻿using Redc.Browser.Attributes;
 
 namespace Redc.Browser.Dom
 {
-    internal class Text : CharacterData, IText
+    [ES("Text")]
+    public class Text : CharacterData
     {
         /// <summary>
         /// 
         /// </summary>
+        [ES("wholeText")]
         public string WholeText { get; }
 
         /// <summary>
@@ -14,7 +16,8 @@ namespace Redc.Browser.Dom
         /// </summary>
         /// <param name="offset"></param>
         /// <returns></returns>
-        public IText SplitText(int offset)
+        [ES("splitText")]
+        public Text SplitText(int offset)
         {
             throw new System.NotImplementedException();
         }

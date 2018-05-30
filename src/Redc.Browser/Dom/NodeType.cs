@@ -9,39 +9,39 @@ namespace Redc.Browser.Dom
     public enum NodeType
     {
         [ES("ELEMENT_NODE")]
-        ElementNode = 1,
+        Element = 1,
 
         [ES("ATTRIBUTE_NODE")]
-        AttributeNode = 2,
+        Attribute = 2,
 
         [ES("TEXT_NODE")]
-        TextNode = 3,
+        Text = 3,
 
         [ES("CDATA_SECTION_NODE")]
-        CDataSectionNode = 4,
+        CDataSection = 4,
 
         [ES("ENTITY_REFERENCE_NODE")]
-        EntityReferenceNode = 5,
+        EntityReference = 5,
 
         [ES("ENTITY_NODE")]
-        EntityNode = 6,
+        Entity = 6,
 
         [ES("PROCESSING_INSTRUCTION_NODE")]
-        ProcessingInstructionNode = 7,
+        ProcessingInstruction = 7,
 
         [ES("COMMENT_NODE")]
-        CommentNode = 8,
+        Comment = 8,
 
         [ES("DOCUMENT_NODE")]
-        DocumentNode = 9,
+        Document = 9,
 
         [ES("DOCUMENT_TYPE_NODE")]
-        DocumentTypeNode = 10,
+        DocumentType = 10,
 
         [ES("DOCUMENT_FRAGMENT_NODE")]
-        DocumentFragmentNode = 11,
+        DocumentFragment = 11,
 
         [ES("NOTATION_NODE")]
-        NotationNode = 12
+        Notation = 12
     }
 }

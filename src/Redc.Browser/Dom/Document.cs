@@ -1,8 +1,7 @@
-﻿using Redc.Browser.Dom.Collections.Interfaces;
+﻿using Redc.Browser.Attributes;
+using Redc.Browser.Dom.Collections;
 using Redc.Browser.Dom.Events;
-using Redc.Browser.Dom.Events.Interfaces;
-using Redc.Browser.Dom.Interfaces;
-using Redc.Browser.Dom.Ranges.Interfaces;
+using Redc.Browser.Dom.Ranges;
 using Redc.Browser.Dom.Traversal;
 using Redc.Browser.Dom.Traversal.Interfaces;
 
@@ -11,54 +10,70 @@ namespace Redc.Browser.Dom
     /// <summary>
     /// Representation of a web page (see W3C DOM4 (4.4))
     /// </summary>
-    internal class Document : Node, IDocument
+    [ES("Document")]
+    public class Document : Node
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        public Document()
+            : base(null, "#document", NodeType.Document) { }
+
         #region Public Properties
 
         /// <summary>
         /// 
         /// </summary>
-        public IDomImplementation Implementation { get; }
+        [ES("implementation")]
+        public DomImplementation Implementation { get; }
 
         /// <summary>
         /// 
         /// </summary>
+        [ES("URL")]
         public string Url { get; }
 
         /// <summary>
         /// 
         /// </summary>
+        [ES("DocumentURI")]
         public string DocumentUri { get; }
 
         /// <summary>
         /// 
         /// </summary>
+        [ES("origin")]
         public string Origin { get; }
 
         /// <summary>
         /// 
         /// </summary>
+        [ES("compatMode")]
         public string CompatabilityMode { get; }
 
         /// <summary>
         /// 
         /// </summary>
+        [ES("characterSet")]
         public string CharacterSet { get; }
 
         /// <summary>
         /// 
         /// </summary>
+        [ES("contentType")]
         public string ContentType { get; }
 
         /// <summary>
         /// 
         /// </summary>
-        public IDocumentType DocumentType { get; }
+        [ES("documentType")]
+        public DocumentType DocumentType { get; }
 
         /// <summary>
         /// 
         /// </summary>
-        public IElement DocumentElement { get; }
+        [ES("documentElement")]
+        public Element DocumentElement { get; }
 
         #endregion
 
@@ -69,7 +84,8 @@ namespace Redc.Browser.Dom
         /// </summary>
         /// <param name="localName"></param>
         /// <returns></returns>
-        public IHtmlCollection GetElementsByTagName(string localName)
+        [ES("getElementsByTagName")]
+        public HtmlCollection GetElementsByTagName(string localName)
         {
             throw new System.NotImplementedException();
         }
@@ -80,7 +96,8 @@ namespace Redc.Browser.Dom
         /// <param name="namespace"></param>
         /// <param name="localName"></param>
         /// <returns></returns>
-        public IHtmlCollection GetElementsByTagNameNS(string @namespace, string localName)
+        [ES("getElementsByTagNameNS")]
+        public HtmlCollection GetElementsByTagNameNS(string @namespace, string localName)
         {
             throw new System.NotImplementedException();
         }
@@ -90,7 +107,8 @@ namespace Redc.Browser.Dom
         /// </summary>
         /// <param name="classNames"></param>
         /// <returns></returns>
-        public IHtmlCollection GetElementsByClassName(string classNames)
+        [ES("getElementsByClassName")]
+        public HtmlCollection GetElementsByClassName(string classNames)
         {
             throw new System.NotImplementedException();
         }
@@ -100,7 +118,8 @@ namespace Redc.Browser.Dom
         /// </summary>
         /// <param name="localName"></param>
         /// <returns></returns>
-        public IElement CreateElement(string localName)
+        [ES("createElement")]
+        public Element CreateElement(string localName)
         {
             throw new System.NotImplementedException();
         }
@@ -111,7 +130,8 @@ namespace Redc.Browser.Dom
         /// <param name="namespace"></param>
         /// <param name="qualifiedName"></param>
         /// <returns></returns>
-        public IElement CreateElementNS(string @namespace, string qualifiedName)
+        [ES("createElementNS")]
+        public Element CreateElementNS(string @namespace, string qualifiedName)
         {
             throw new System.NotImplementedException();
         }
@@ -120,17 +140,8 @@ namespace Redc.Browser.Dom
         /// 
         /// </summary>
         /// <returns></returns>
-        public IDocumentFragment CreateDocumentFragment()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        public IText CreateTextNode(string data)
+        [ES("createDocumentFragment")]
+        public DocumentFragment CreateDocumentFragment()
         {
             throw new System.NotImplementedException();
         }
@@ -140,7 +151,19 @@ namespace Redc.Browser.Dom
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public IComment CreateComment(string data)
+        [ES("createTextNode")]
+        public Text CreateTextNode(string data)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        [ES("createComment")]
+        public Comment CreateComment(string data)
         {
             throw new System.NotImplementedException();
         }
@@ -151,7 +174,8 @@ namespace Redc.Browser.Dom
         /// <param name="target"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public IProcessingInstruction CreateProcessingInstruction(string target, string data)
+        [ES("createProcessingInstruction")]
+        public ProcessingInstruction CreateProcessingInstruction(string target, string data)
         {
             throw new System.NotImplementedException();
         }
@@ -162,7 +186,8 @@ namespace Redc.Browser.Dom
         /// <param name="node"></param>
         /// <param name="deep"></param>
         /// <returns></returns>
-        public INode ImportNode(INode node, bool deep = false)
+        [ES("importNode")]
+        public Node ImportNode(Node node, bool deep = false)
         {
             throw new System.NotImplementedException();
         }
@@ -172,7 +197,8 @@ namespace Redc.Browser.Dom
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        public INode AdoptNode(INode node)
+        [ES("adoptNode")]
+        public Node AdoptNode(Node node)
         {
             throw new System.NotImplementedException();
         }
@@ -182,6 +208,7 @@ namespace Redc.Browser.Dom
         /// </summary>
         /// <param name="interface"></param>
         /// <returns></returns>
+        [ES("createEvent")]
         public Event CreateEvent(string @interface)
         {
             throw new System.NotImplementedException();
@@ -191,7 +218,8 @@ namespace Redc.Browser.Dom
         /// 
         /// </summary>
         /// <returns></returns>
-        public IRange CreateRange()
+        [ES("createRange")]
+        public Range CreateRange()
         {
             throw new System.NotImplementedException();
         }
@@ -203,7 +231,8 @@ namespace Redc.Browser.Dom
         /// <param name="whatToShow"></param>
         /// <param name="filter"></param>
         /// <returns></returns>
-        public INodeIterator CreateNodeIterator(INode root, FilterSettings whatToShow, NodeFilter filter = null)
+        [ES("createNodeIterator")]
+        public NodeIterator CreateNodeIterator(Node root, FilterSettings whatToShow, NodeFilter filter = null)
         {
             throw new System.NotImplementedException();
         }
@@ -215,7 +244,8 @@ namespace Redc.Browser.Dom
         /// <param name="whatToShow"></param>
         /// <param name="filter"></param>
         /// <returns></returns>
-        public ITreeWalker CreateTreeWalker(INode node, FilterSettings whatToShow = FilterSettings.ShowAll, NodeFilter filter = null)
+        [ES("createTreeWalker")]
+        public TreeWalker CreateTreeWalker(Node node, FilterSettings whatToShow = FilterSettings.ShowAll, NodeFilter filter = null)
         {
             throw new System.NotImplementedException();
         }

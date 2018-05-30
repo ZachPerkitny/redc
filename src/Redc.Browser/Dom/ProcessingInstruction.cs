@@ -1,12 +1,17 @@
-﻿using Redc.Browser.Dom.Interfaces;
+﻿using Redc.Browser.Attributes;
 
 namespace Redc.Browser.Dom
 {
-    internal class ProcessingInstruction : CharacterData, IProcessingInstruction
+    /// <summary>
+    /// 
+    /// </summary>
+    [ES("ProcessingInstruction")]
+    public class ProcessingInstruction : CharacterData
     {
         /// <summary>
         /// 
         /// </summary>
+        [ES("target")]
         public string Target { get; }
     }
 }

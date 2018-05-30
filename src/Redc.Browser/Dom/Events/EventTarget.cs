@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
-using Redc.Browser.Dom.Events.Interfaces;
+using Redc.Browser.Attributes;
 
 namespace Redc.Browser.Dom.Events
 {
     /// <summary>
     /// 
     /// </summary>
-    internal class EventTarget : IEventTarget
+    [ES("EventTarget")]
+    public class EventTarget
     {
         private readonly List<EventListener> _listeners;
 
@@ -24,6 +25,7 @@ namespace Redc.Browser.Dom.Events
         /// <param name="type"></param>
         /// <param name="callback"></param>
         /// <param name="capture"></param>
+        [ES("addEventListener")]
         public void AddEventListener(string type, EventHandler callback, bool capture = false)
         {
             if (callback != null)
@@ -37,6 +39,7 @@ namespace Redc.Browser.Dom.Events
         /// </summary>
         /// <param name="event"></param>
         /// <returns></returns>
+        [ES("dispatchEvent")]
         public bool DispatchEvent(Event @event)
         {
             if ((@event.Flags & EventFlags.Dispatch) == EventFlags.Dispatch ||
@@ -55,6 +58,7 @@ namespace Redc.Browser.Dom.Events
         /// <param name="type"></param>
         /// <param name="callback"></param>
         /// <param name="capture"></param>
+        [ES("removeEventListener")]
         public void RemoveEventListener(string type, EventHandler callback, bool capture = false)
         {
             throw new System.NotImplementedException();

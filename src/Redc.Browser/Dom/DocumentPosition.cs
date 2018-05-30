@@ -10,22 +10,24 @@ namespace Redc.Browser.Dom
     [ES("Node")]
     public enum DocumentPosition : ushort
     {
+        None = 0x0,
+
         [ES("DOCUMENT_POSITION_DISCONNECTED")]
-        DocumentPositionDisconnected = 0x01,
+        Disconnected = 0x01,
 
         [ES("DOCUMENT_POSITION_PRECEDING")]
-        DocumentPositionPreceding = 0x02,
+        Preceding = 0x02,
 
         [ES("DOCUMENT_POSITION_FOLLOWING")]
-        DocumentPositionFollowing = 0x04,
+        Following = 0x04,
 
         [ES("DOCUMENT_POSITION_CONTAINS")]
-        DocumentPositionContains = 0x08,
+        Contains = 0x08,
 
         [ES("DOCUMENT_POSITION_CONTAINED_BY")]
-        DocumentPositionContainedBy = 0x10,
+        ContainedBy = 0x10,
 
         [ES("DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC")]
-        DocumentPositionImplementationSpecific = 0x20
+        ImplementationSpecific = 0x20
     }
 }

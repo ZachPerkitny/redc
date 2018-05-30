@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Redc.Browser.Attributes;
-using Redc.Browser.Dom.Events.Interfaces;
-using Redc.Browser.Dom.Interfaces;
 
 namespace Redc.Browser.Dom.Events
 {
@@ -46,13 +44,13 @@ namespace Redc.Browser.Dom.Events
         /// 
         /// </summary>
         [ES("target")]
-        public IEventTarget Target { get; private set; }
+        public EventTarget Target { get; private set; }
 
         /// <summary>
         /// 
         /// </summary>
         [ES("currentTarget")]
-        public IEventTarget CurrentTarget { get; internal set; }
+        public EventTarget CurrentTarget { get; internal set; }
 
         /// <summary>
         /// 
@@ -155,13 +153,13 @@ namespace Redc.Browser.Dom.Events
         /// 
         /// </summary>
         /// <returns></returns>
-        internal bool Dispatch(IEventTarget target)
+        internal bool Dispatch(EventTarget target)
         {
             Flags |= EventFlags.Dispatch;
             Target = target;
 
-            List<IEventTarget> eventPath = new List<IEventTarget>();
-            if (target is INode node)
+            List<EventTarget> eventPath = new List<EventTarget>();
+            if (target is Node node)
             {
                 while (node.ParentNode != null)
                 {

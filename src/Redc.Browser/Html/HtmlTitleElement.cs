@@ -1,15 +1,17 @@
-﻿using Redc.Browser.Html.Interfaces;
+﻿using Redc.Browser.Attributes;
 
 namespace Redc.Browser.Html
 {
     /// <summary>
     /// Represents the document's title or name
     /// </summary>
-    internal class HtmlTitleElement : HtmlElement, IHtmlTitleElement
+    [ES("HTMLTitleElement")]
+    public class HtmlTitleElement : HtmlElement
     {
         /// <summary>
         /// 
         /// </summary>
+        [ES("text")]
         public string Text { get; set; }
     }
 }

@@ -1,13 +1,12 @@
 ﻿using Redc.Browser.Attributes;
-using Redc.Browser.Dom.Interfaces;
 
-namespace Redc.Browser.Dom.Collections.Interfaces
+namespace Redc.Browser.Dom.Collections
 {
     /// <summary>
     /// 
     /// </summary>
     [ES("NamedNodeMap")]
-    public interface INamedNodeMap
+    public class NamedNodeMap
     {
         /// <summary>
         /// 
@@ -15,7 +14,10 @@ namespace Redc.Browser.Dom.Collections.Interfaces
         /// <param name="index"></param>
         /// <returns></returns>
         [ES("item")]
-        INode this[int index] { get; }
+        public Node this[int index]
+        {
+            get { throw new System.NotImplementedException(); }
+        }
 
         /// <summary>
         /// 
@@ -23,7 +25,10 @@ namespace Redc.Browser.Dom.Collections.Interfaces
         /// <param name="name"></param>
         /// <returns></returns>
         [ES("getNamedItem")]
-        INode GetNamedItem(string name);
+        public Node GetNamedItem(string name)
+        {
+            throw new System.NotImplementedException();
+        }
 
         /// <summary>
         /// 
@@ -31,7 +36,10 @@ namespace Redc.Browser.Dom.Collections.Interfaces
         /// <param name="arg"></param>
         /// <returns></returns>
         [ES("setNamedItem")]
-        INode SetNamedItem(INode arg);
+        public Node SetNamedItem(Node arg)
+        {
+            throw new System.NotImplementedException();
+        }
 
         /// <summary>
         /// 
@@ -39,7 +47,10 @@ namespace Redc.Browser.Dom.Collections.Interfaces
         /// <param name="name"></param>
         /// <returns></returns>
         [ES("removeNamedItem")]
-        INode RemoveNamedItem(string name);
+        public Node RemoveNamedItem(string name)
+        {
+            throw new System.NotImplementedException();
+        }
 
         /// <summary>
         /// 
@@ -48,7 +59,10 @@ namespace Redc.Browser.Dom.Collections.Interfaces
         /// <param name="localName"></param>
         /// <returns></returns>
         [ES("getNamedItemNS")]
-        INode GetNamedItemNS(string namespaceUri, string localName);
+        public Node GetNamedItemNS(string namespaceUri, string localName)
+        {
+            throw new System.NotImplementedException();
+        }
 
         /// <summary>
         /// 
@@ -56,7 +70,10 @@ namespace Redc.Browser.Dom.Collections.Interfaces
         /// <param name="arg"></param>
         /// <returns></returns>
         [ES("setNamedItemNS")]
-        INode SetNamedItemNS(INode arg);
+        public Node SetNamedItemNS(Node arg)
+        {
+            throw new System.NotImplementedException();
+        }
 
         /// <summary>
         /// 
@@ -65,6 +82,9 @@ namespace Redc.Browser.Dom.Collections.Interfaces
         /// <param name="localName"></param>
         /// <returns></returns>
         [ES("removeNamedItem")]
-        INode RemoveNamedItemNS(string namespaceUri, string localName);
+        public Node RemoveNamedItemNS(string namespaceUri, string localName)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

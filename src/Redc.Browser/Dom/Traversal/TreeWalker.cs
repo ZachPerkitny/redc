@@ -1,85 +1,105 @@
 ﻿using Redc.Browser.Attributes;
-using Redc.Browser.Dom.Interfaces;
 
-namespace Redc.Browser.Dom.Traversal.Interfaces
+namespace Redc.Browser.Dom.Traversal
 {
     /// <summary>
     /// 
     /// </summary>
     [ES("TreeWalker")]
-    public interface ITreeWalker
+    public class TreeWalker
     {
         /// <summary>
         /// 
         /// </summary>
         [ES("root")]
-        INode Root { get; }
+        public Node Root { get; }
 
         /// <summary>
         /// 
         /// </summary>
         [ES("whatToShow")]
-        FilterSettings FilterSettings { get; }
+        public FilterSettings FilterSettings { get; }
 
         /// <summary>
         /// 
         /// </summary>
         [ES("filter")]
-        NodeFilter Filter { get; }
+        public NodeFilter Filter { get; }
 
         /// <summary>
         /// 
         /// </summary>
         [ES("currentNode")]
-        INode CurrentNode { get; set; }
+        public Node CurrentNode { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
         [ES("parentNode")]
-        INode ParentNode();
+        public Node ParentNode()
+        {
+            throw new System.NotImplementedException();
+        }
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
         [ES("firstChild")]
-        INode FirstChild();
+        public Node FirstChild()
+        {
+            throw new System.NotImplementedException();
+        }
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
         [ES("lastChild")]
-        INode LastChild();
+        public Node LastChild()
+        {
+            throw new System.NotImplementedException();
+        }
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
         [ES("previousSibling")]
-        INode PreviousSibling();
+        public Node PreviousSibling()
+        {
+            throw new System.NotImplementedException();
+        }
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
         [ES("nextSibling")]
-        INode NextSibling();
+        public Node NextSibling()
+        {
+            throw new System.NotImplementedException();
+        }
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
         [ES("previousNode")]
-        INode PreviousNode();
+        public Node PreviousNode()
+        {
+            throw new System.NotImplementedException();
+        }
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
         [ES("nextNode")]
-        INode NextNode();
+        public Node NextNode()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

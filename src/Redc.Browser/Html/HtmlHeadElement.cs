@@ -1,9 +1,10 @@
-﻿using Redc.Browser.Html.Interfaces;
+﻿using Redc.Browser.Attributes;
 
 namespace Redc.Browser.Html
 {
     /// <summary>
     /// Represents a collection of metadata for the Document
     /// </summary>
-    internal class HtmlHeadElement : HtmlElement, IHtmlHeadElement { }
+    [ES("HTMLHeadElement")]
+    public class HtmlHeadElement : HtmlElement { }
 }

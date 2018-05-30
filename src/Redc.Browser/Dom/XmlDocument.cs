@@ -1,10 +1,10 @@
 ﻿using Redc.Browser.Attributes;
 
-namespace Redc.Browser.Dom.Interfaces
+namespace Redc.Browser.Dom
 {
     /// <summary>
     /// 
     /// </summary>
     [ES("XMLDocument")]
-    public interface IXmlDocument : IDocument { }
+    public class XmlDocument : Document { }
 }

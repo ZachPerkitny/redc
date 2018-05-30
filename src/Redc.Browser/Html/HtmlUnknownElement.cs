@@ -1,10 +1,10 @@
 ﻿using Redc.Browser.Attributes;
 
-namespace Redc.Browser.Html.Interfaces
+namespace Redc.Browser.Html
 {
     /// <summary>
     /// 
     /// </summary>
     [ES("HTMLUnknownElement")]
-    public interface IHtmlUnknownElement : IHtmlElement { }
+    public class HtmlUnknownElement : HtmlElement { }
 }

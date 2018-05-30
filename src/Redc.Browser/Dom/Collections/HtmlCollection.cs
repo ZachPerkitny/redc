@@ -1,18 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using Redc.Browser.Dom.Collections.Interfaces;
-using Redc.Browser.Dom.Interfaces;
+using Redc.Browser.Attributes;
 
 namespace Redc.Browser.Dom.Collections
 {
     /// <summary>
     /// Collection of elements
     /// </summary>
-    internal class HtmlCollection : IHtmlCollection
+    [ES("HTMLCollection")]
+    public class HtmlCollection : IEnumerable<Element>
     {
         #region Fields
 
-        private readonly List<IElement> _elements;
+        private readonly List<Element> _elements;
 
         #endregion
 
@@ -22,9 +22,9 @@ namespace Redc.Browser.Dom.Collections
         /// 
         /// </summary>
         /// <param name="elements"></param>
-        public HtmlCollection(IEnumerable<IElement> elements)
+        public HtmlCollection(IEnumerable<Element> elements)
         {
-            _elements = new List<IElement>(elements);
+            _elements = new List<Element>(elements);
         }
 
         #endregion
@@ -34,6 +34,7 @@ namespace Redc.Browser.Dom.Collections
         /// <summary>
         /// 
         /// </summary>
+        [ES("length")]
         public int Length
         {
             get { return _elements.Count; }
@@ -44,7 +45,8 @@ namespace Redc.Browser.Dom.Collections
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
-        public IElement this[int index]
+        [ES("item")]
+        public Element this[int index]
         {
             get { return _elements[index]; }
         }
@@ -55,18 +57,27 @@ namespace Redc.Browser.Dom.Collections
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public IElement this[string name]
+        [ES("namedItem")]
+        public Element this[string name]
         {
             get
             {
-                throw new System.NotImplementedException();
+                foreach (Element element in _elements)
+                {
+                    if (element.ID == name)
+                    {
+                        return element;
+                    }
+                }
+
+                return null;
             }
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public IEnumerable<IElement> Elements
+        public IEnumerable<Element> Elements
         {
             get { return _elements.AsReadOnly(); }
         }
@@ -79,7 +90,7 @@ namespace Redc.Browser.Dom.Collections
         /// 
         /// </summary>
         /// <returns></returns>
-        public IEnumerator<IElement> GetEnumerator()
+        public IEnumerator<Element> GetEnumerator()
         {
             return _elements.GetEnumerator();
         }

@@ -1,23 +1,29 @@
-﻿using System;
-using Redc.Browser.Dom.Collections.Interfaces;
+﻿using Redc.Browser.Attributes;
+using Redc.Browser.Dom.Collections;
 using Redc.Browser.Dom.Events;
-using Redc.Browser.Dom.Interfaces;
+using System;
+using System.Text;
 
 namespace Redc.Browser.Dom
 {
     /// <summary>
     /// DOM Node Base Class (see W3C DOM4 (4.4))
     /// </summary>
-    internal abstract class Node : EventTarget, INode
+    public abstract class Node : EventTarget
     {
         #region Ctor
 
         /// <summary>
         /// 
         /// </summary>
-        public Node()
+        /// <param name="owner"></param>
+        /// <param name="nodeName"></param>
+        /// <param name="nodeType"></param>
+        public Node(Document owner, string nodeName, NodeType nodeType)
         {
-
+            OwnerDocument = owner;
+            NodeType = nodeType;
+            NodeName = nodeName;
         }
 
         #endregion
@@ -27,67 +33,145 @@ namespace Redc.Browser.Dom
         /// <summary>
         /// The type of node
         /// </summary>
+        [ES("nodeType")]
         public NodeType NodeType { get; private set; }
 
         /// <summary>
         /// The name of the node
         /// </summary>
+        [ES("nodeName")]
         public string NodeName { get; private set; }
 
         /// <summary>
         /// 
         /// </summary>
+        [ES("baseUri")]
         public string BaseUri { get; private set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public IDocument OwnerDocument { get; private set; }
+        [ES("ownerDocument")]
+        public Document OwnerDocument { get; private set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public INode ParentNode { get; }
+        [ES("parentNode")]
+        public Node ParentNode { get; private set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public IElement ParentElement { get; }
+        [ES("parentElement")]
+        public Element ParentElement
+        {
+            get { return ParentNode as Element; }
+        }
 
         /// <summary>
         /// 
         /// </summary>
-        public INodeList ChildNodes { get; }
+        [ES("childNodes")]
+        public NodeList ChildNodes { get; private set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public INode FirstChild { get; }
+        [ES("firstChild")]
+        public Node FirstChild
+        {
+            get
+            {
+                return (ChildNodes.Length > 0) ? ChildNodes[0] : null;
+            }
+        }
 
         /// <summary>
         /// 
         /// </summary>
-        public INode LastChild { get; }
+        [ES("lastChild")]
+        public Node LastChild
+        {
+            get
+            {
+                return (ChildNodes.Length > 0) ? ChildNodes[ChildNodes.Length - 1] : null;
+            }
+        }
 
         /// <summary>
         /// 
         /// </summary>
-        public INode PreviousSibling { get; }
+        [ES("previousSibling")]
+        public Node PreviousSibling
+        {
+            get
+            {
+                if (ParentNode != null)
+                {
+                    int i = 1;
+                    int n = ParentNode.ChildNodes.Length;
+                    while (i < n)
+                    {
+                        if (ReferenceEquals(this, ParentNode.ChildNodes[i]))
+                        {
+                            return ParentNode.ChildNodes[i - 1];
+                        }
+
+                        i++;
+                    }
+                }
+                
+                return null;
+            }
+        }
 
         /// <summary>
         /// 
         /// </summary>
-        public INode NextSibling { get; } 
+        [ES("nextSibling")]
+        public Node NextSibling
+        {
+            get
+            {
+                if (ParentNode != null)
+                {
+                    int i = 0;
+                    int n = ParentNode.ChildNodes.Length - 1;
+                    while (i < n)
+                    {
+                        if (ReferenceEquals(this, ParentNode.ChildNodes[i]))
+                        {
+                            return ParentNode.ChildNodes[i + 1];
+                        }
+
+                        i++;
+                    }
+                }
+
+                return null;
+            }
+        }
 
         /// <summary>
         /// 
         /// </summary>
-        public string NodeValue { get; set; }
+        [ES("NodeValue")]
+        public virtual string NodeValue
+        {
+            get { return null; }
+            set { }
+        }
 
         /// <summary>
         /// 
         /// </summary>
-        public string TextContent { get; set; }
+        [ES("textContent")]
+        public virtual string TextContent
+        {
+            get { return null; }
+            set { }
+        }
 
         #endregion
 
@@ -97,17 +181,37 @@ namespace Redc.Browser.Dom
         /// 
         /// </summary>
         /// <returns></returns>
+        [ES("hasChildNodes")]
         public bool HasChildNodes()
         {
-            throw new NotImplementedException();
+            return ChildNodes.Length > 0;
         }
 
         /// <summary>
         /// 
         /// </summary>
+        [ES("normalize")]
         public void Normalize()
         {
-            throw new NotImplementedException();
+            foreach (Node childNode in ChildNodes)
+            {
+                if (childNode is Text node)
+                {
+                    if (node.Length == 0)
+                    {
+                        RemoveChild(node);
+                    }
+                    else
+                    {
+                        StringBuilder sb = new StringBuilder();
+                        // TODO: Ranges
+                    }
+                }
+                else if (childNode.HasChildNodes())
+                {
+                    childNode.Normalize();
+                }
+            }
         }
 
         /// <summary>
@@ -115,7 +219,8 @@ namespace Redc.Browser.Dom
         /// </summary>
         /// <param name="deep"></param>
         /// <returns></returns>
-        public INode CloneNode(bool deep = false)
+        [ES("isEqualNode")]
+        public virtual Node CloneNode(bool deep = false)
         {
             throw new NotImplementedException();
         }
@@ -125,9 +230,26 @@ namespace Redc.Browser.Dom
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        public bool IsEqualNode(INode node)
+        [ES("isEqualNode")]
+        public virtual bool IsEqualNode(Node node)
         {
-            throw new NotImplementedException();
+            // Reference: https://www.w3.org/TR/2015/REC-dom-20151119/#concept-node-equals
+            if (NodeType == node.NodeType && ChildNodes.Length == node.ChildNodes.Length)
+            {
+                int n = ChildNodes.Length;
+
+                for (int i = 0; i < n; i++)
+                {
+                    if (!ChildNodes[i].Equals(node.ChildNodes[i]))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -135,9 +257,34 @@ namespace Redc.Browser.Dom
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public DocumentPosition CompareDocumentPosition(INode other)
+        [ES("compareDocumentPosition")]
+        public DocumentPosition CompareDocumentPosition(Node other)
         {
-            throw new NotImplementedException();
+            if (ReferenceEquals(this, other))
+            {
+                return DocumentPosition.None;
+            }
+            else if (!ReferenceEquals(OwnerDocument, other.OwnerDocument))
+            {
+                // TODO
+                return DocumentPosition.None;
+            }
+            else if (IsAncestorOf(other))
+            {
+                return DocumentPosition.Contains | DocumentPosition.Preceding;
+            }
+            else if (IsDescendantOf(other))
+            {
+                return DocumentPosition.ContainedBy | DocumentPosition.Following;
+            }
+            else if (IsPreceding(other))
+            {
+                return DocumentPosition.Preceding;
+            }
+            else
+            {
+                return DocumentPosition.Following;
+            }
         }
 
         /// <summary>
@@ -145,7 +292,8 @@ namespace Redc.Browser.Dom
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public bool Contains(INode other)
+        [ES("contains")]
+        public bool Contains(Node other)
         {
             throw new NotImplementedException();
         }
@@ -155,9 +303,15 @@ namespace Redc.Browser.Dom
         /// </summary>
         /// <param name="namespace"></param>
         /// <returns></returns>
+        [ES("lookupPrefix")]
         public string LookupPrefix(string @namespace)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(@namespace))
+            {
+                return null;
+            }
+
+            return LocatePrefixForNamespace(@namespace);
         }
 
         /// <summary>
@@ -165,16 +319,52 @@ namespace Redc.Browser.Dom
         /// </summary>
         /// <param name="prefix"></param>
         /// <returns></returns>
+        [ES("lookupNamespaceURI")]
         public string LookupNamespaceUri(string prefix)
         {
-            throw new NotImplementedException();
+            if (prefix == string.Empty)
+            {
+                prefix = null;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="namespace"></param>
+        /// <returns></returns>
+        [ES("isDefaultNamespace")]
+        public bool IsDefaultNamespace(string @namespace)
+        {
+            if (@namespace == string.Empty)
+            {
+                @namespace = null;
+            }
+
+            return false;
         }
 
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="node"></param>
+        /// <param name="child"></param>
         /// <returns></returns>
-        public bool IsDefaultNamespace()
+        [ES("insertBefore")]
+        public Node InsertBefore(Node node, Node child = null)
+        {
+            return PreInsert(node, child);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        [ES("appendChild")]
+        public Node AppendChild(Node node)
         {
             throw new NotImplementedException();
         }
@@ -185,28 +375,8 @@ namespace Redc.Browser.Dom
         /// <param name="node"></param>
         /// <param name="child"></param>
         /// <returns></returns>
-        public INode InsertBefore(INode node, INode child = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="node"></param>
-        /// <returns></returns>
-        public INode AppendChild(INode node)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="node"></param>
-        /// <param name="child"></param>
-        /// <returns></returns>
-        public INode ReplaceChild(INode node, INode child)
+        [ES("replaceChild")]
+        public Node ReplaceChild(Node node, Node child)
         {
             throw new NotImplementedException();
         }
@@ -216,9 +386,160 @@ namespace Redc.Browser.Dom
         /// </summary>
         /// <param name="child"></param>
         /// <returns></returns>
-        public INode RemoveChild(INode child)
+        [ES("removeChild")]
+        public Node RemoveChild(Node child)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void EnsurePreInsertionValidity(Node node, Node child)
+        {
+            
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public bool IsAncestorOf(Node other)
+        {
+            return other.IsDescendantOf(this);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public bool IsDescendantOf(Node other)
+        {
+            Node node = this;
+
+            while (node.ParentElement != null)
+            {
+                if (ReferenceEquals(node.ParentElement, other))
+                {
+                    return true;
+                }
+
+                node = node.ParentElement;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public bool IsHostIncludingInclusiveAncestorOf(Node other)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public bool IsInclusiveAncestorOf(Node other)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public bool IsPreceding(Node other)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return IsEqualNode(obj as Node);
+        }
+
+        #endregion
+
+        #region Protected Methods
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="namespace"></param>
+        /// <returns></returns>
+        protected virtual string LocatePrefixForNamespace(string @namespace)
+        {
+            return null;
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="child"></param>
+        /// <returns></returns>
+        private Node PreInsert(Node node, Node child)
+        {
+            // Reference: https://www.w3.org/TR/2015/REC-dom-20151119/#concept-node-pre-insert
+            EnsurePreInsertionValidity(node, child);
+
+            if (node == child)
+            {
+                child = node.NextSibling;
+            }
+
+            OwnerDocument.AdoptNode(node);
+            Insert(node, child);
+            return node;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="child"></param>
+        private void Insert(Node node, Node child)
+        {
+            // Reference: https://www.w3.org/TR/2015/REC-dom-20151119/#concept-node-insert
+            int count = (node.NodeType == NodeType.DocumentFragment) ? node.ChildNodes.Length : 1;
+
+            if (child != null)
+            {
+                // TODO: RAnges
+            }
         }
 
         #endregion

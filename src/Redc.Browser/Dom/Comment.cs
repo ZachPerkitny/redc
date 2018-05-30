@@ -1,6 +1,10 @@
-﻿using Redc.Browser.Dom.Interfaces;
+﻿using Redc.Browser.Attributes;
 
 namespace Redc.Browser.Dom
 {
-    internal class Comment : CharacterData, IComment { }
+    /// <summary>
+    /// 
+    /// </summary>
+    [ES("Comment")]
+    public class Comment : CharacterData { }
 }
