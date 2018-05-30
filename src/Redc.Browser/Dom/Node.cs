@@ -169,6 +169,14 @@ namespace Redc.Browser.Dom
             set { }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public virtual int Length
+        {
+            get { return ChildNodes.Length; }
+        }
+
         #endregion
 
         #region Public Methods

@@ -56,5 +56,13 @@ namespace Redc.Browser.Dom
         {
             get { return Name; }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public override int Length
+        {
+            get { return 0; }
+        }
     }
 }

@@ -47,7 +47,7 @@ namespace Redc.Browser.Dom
         /// 
         /// </summary>
         [ES("length")]
-        public int Length
+        public override int Length
         {
             get { return _data.Length; }
         }

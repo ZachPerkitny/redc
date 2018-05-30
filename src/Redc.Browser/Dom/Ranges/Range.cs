@@ -1,4 +1,6 @@
-﻿using Redc.Browser.Attributes;
+﻿using System;
+using System.Collections.Generic;
+using Redc.Browser.Attributes;
 
 namespace Redc.Browser.Dom.Ranges
 {
@@ -7,43 +9,89 @@ namespace Redc.Browser.Dom.Ranges
     /// </summary>
     [ES("Range")]
     public class Range
-    {       
+    {
+        private Boundary _start;
+        private Boundary _end;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="document"></param>
+        public Range(Document document)
+        {
+            _start = new Boundary { Node = document, Offset = 0 };
+            _end = new Boundary { Node = document, Offset = 0 };
+        }
+
+        #region Public Properties
+
         /// <summary>
         /// 
         /// </summary>
         [ES("startContainer")]
-        public Node StartContainer { get; }
+        public Node StartContainer
+        {
+            get { return _start.Node; }
+        }
         
         /// <summary>
         /// 
         /// </summary>
         [ES("startOffset")]
-        public int StartOffset { get; }
+        public int StartOffset
+        {
+            get { return _start.Offset; }
+        }
         
         /// <summary>
         /// 
         /// </summary>
         [ES("endContainer")]
-        public Node EndContainer { get; }
+        public Node EndContainer
+        {
+            get { return _end.Node; }
+        }
         
         /// <summary>
         /// 
         /// </summary>
         [ES("endOffset")]
-        public int EndOffset { get; }
+        public int EndOffset
+        {
+            get { return _end.Offset; }
+        }
         
         /// <summary>
         /// 
         /// </summary>
         [ES("collapsed")]
-        public bool Collapsed { get; }
+        public bool Collapsed
+        {
+            get { return _start.Node == _end.Node; }
+        }
         
         /// <summary>
         /// 
         /// </summary>
         [ES("commonAncestorContainer")]
-        public Node CommonAncestorContainer { get; }
-        
+        public Node CommonAncestorContainer
+        {
+            get
+            {
+                Node container = _start.Node;
+                while (container != null && container.IsInclusiveAncestorOf(_end.Node))
+                {
+                    container = container.ParentNode;
+                }
+
+                return container;
+            }
+        }
+
+        #endregion
+
+        #region Public Methods
+
         /// <summary>
         /// 
         /// </summary>
@@ -52,7 +100,7 @@ namespace Redc.Browser.Dom.Ranges
         [ES("setStart")]
         public void SetStart(Node node, int offset)
         {
-            throw new System.NotImplementedException();
+            SetBoundary(node, offset, true);
         }
         
         /// <summary>
@@ -63,7 +111,7 @@ namespace Redc.Browser.Dom.Ranges
         [ES("setEnd")]
         public void SetEnd(Node node, int offset)
         {
-            throw new System.NotImplementedException();
+            SetBoundary(node, offset, false);
         }
         
         /// <summary>
@@ -73,7 +121,14 @@ namespace Redc.Browser.Dom.Ranges
         [ES("setStartBefore")]
         public void SetStartBefore(Node node)
         {
-            throw new System.NotImplementedException();
+            Node parent = node.ParentNode;
+
+            if (parent == null)
+            {
+                throw new Exception();
+            }
+
+            //SetBoundary(parent, , true);
         }
         
         /// <summary>
@@ -83,9 +138,16 @@ namespace Redc.Browser.Dom.Ranges
         [ES("setStartAfter")]
         public void SetStartAfter(Node node)
         {
-            throw new System.NotImplementedException();
+            Node parent = node.ParentNode;
+
+            if (parent == null)
+            {
+                throw new Exception();
+            }
+
+            //SetBoundary(parent, , true); 
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -93,9 +155,16 @@ namespace Redc.Browser.Dom.Ranges
         [ES("setEndBefore")]
         public void SetEndBefore(Node node)
         {
-            throw new System.NotImplementedException();
+            Node parent = node.ParentNode;
+
+            if (parent == null)
+            {
+                throw new Exception();
+            }
+
+            //SetBoundary(parent, , false);
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -103,9 +172,16 @@ namespace Redc.Browser.Dom.Ranges
         [ES("setEndAfter")]
         public void SetEndAfter(Node node)
         {
-            throw new System.NotImplementedException();
+            Node parent = node.ParentNode;
+
+            if (parent == null)
+            {
+                throw new Exception();
+            }
+
+            //SetBoundary(parent, , false);
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -250,5 +326,143 @@ namespace Redc.Browser.Dom.Ranges
         {
             throw new System.NotImplementedException();
         }
+
+        #endregion
+
+        #region Private Methods
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="offset"></param>
+        /// <param name="setTheStart"></param>
+        private void SetBoundary(Node node, int offset, bool setTheStart)
+        {
+            if (node == null)
+            {
+                throw new ArgumentNullException(nameof(node));
+            }
+
+            if (node.NodeType == NodeType.DocumentType)
+            {
+                throw new Exception();
+            }
+
+            if (offset > node.Length)
+            {
+                throw new Exception();
+            }
+
+            Boundary bp = new Boundary
+            {
+                Node = node,
+                Offset = offset
+            };
+
+            if (setTheStart)
+            {
+                if (bp > _end)
+                {
+                    _end = bp;
+                }
+
+                _start = bp;
+            }
+            else
+            {
+                if (bp < _start)
+                {
+                    _start = bp;
+                }
+
+                _end = bp;
+            }
+        }
+
+        #endregion
+
+        #region Boundary Struct
+
+        /// <summary>
+        /// 
+        /// </summary>
+        internal struct Boundary : IComparable<Boundary>, IEquatable<Boundary>
+        {
+            public Node Node;
+            public int Offset;
+
+            public static bool operator <(Boundary obj1, Boundary obj2)
+            {
+                return obj1.CompareTo(obj2) < 0;
+            }
+
+            public static bool operator >(Boundary obj1, Boundary obj2)
+            {
+                return obj1.CompareTo(obj2) > 0;
+            }
+
+            public static bool operator <=(Boundary obj1, Boundary obj2)
+            {
+                return obj1.CompareTo(obj2) <= 0;
+            }
+
+            public static bool operator >=(Boundary obj1, Boundary obj2)
+            {
+                return obj1.CompareTo(obj2) >= 0;
+            }
+
+            public static bool operator !=(Boundary obj1, Boundary obj2)
+            {
+                return obj1.CompareTo(obj2) != 0;
+            }
+
+            public static bool operator ==(Boundary obj1, Boundary obj2)
+            {
+                return obj1.CompareTo(obj2) != 0;
+            }
+
+            public int CompareTo(Boundary other)
+            {
+                if (Node == other.Node)
+                {
+                    if (Offset > other.Offset)
+                    {
+                        return 1;
+                    }
+                    else if (Offset < other.Offset)
+                    {
+                        return -1;
+                    }
+                    else
+                    {
+                        return 0;
+                    }
+                }
+
+                return -1;
+            }
+
+            public bool Equals(Boundary other)
+            {
+                return CompareTo(other) == 0;
+            }
+
+            public override bool Equals(object obj)
+            {
+                return (obj is Boundary) && (CompareTo((Boundary)obj) == 0);
+            }
+
+            public override int GetHashCode()
+            {
+                int hashCode = -2042807521;
+                hashCode = hashCode * -1521134295 + base.GetHashCode();
+                hashCode = hashCode * -1521134295 + EqualityComparer<Node>.Default.GetHashCode(Node);
+                hashCode = hashCode * -1521134295 + Offset.GetHashCode();
+                return hashCode;
+            }
+        }
+
+        #endregion
     }
 }
