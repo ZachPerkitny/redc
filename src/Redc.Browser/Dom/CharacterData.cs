@@ -8,14 +8,17 @@ namespace Redc.Browser.Dom
     [ES("CharacterData")]
     public abstract class CharacterData : Node
     {
+        private string _data;
+
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="document"></param>
-        /// <param name="name"></param>
-        /// <param name="nodeType"></param>
-        public CharacterData(Document document, string name, NodeType nodeType)
-            : base(document, name, nodeType) { }
+        /// <param name="owner"></param>
+        public CharacterData(Document owner)
+            : base(owner)
+        {
+            _data = string.Empty;
+        }
 
         #region Public Properties
 
@@ -23,13 +26,31 @@ namespace Redc.Browser.Dom
         /// 
         /// </summary>
         [ES("data")]
-        public string Data { get; set; }
+        public string Data
+        {
+            get
+            {
+                return _data;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    value = string.Empty;
+                }
+
+                _data = value;
+            }
+        }
 
         /// <summary>
         /// 
         /// </summary>
         [ES("length")]
-        public int Length { get; }
+        public int Length
+        {
+            get { return _data.Length; }
+        }
 
         #endregion
 
@@ -42,7 +63,7 @@ namespace Redc.Browser.Dom
         [ES("appendData")]
         public void AppendData(string data)
         {
-            throw new System.NotImplementedException();
+            ReplaceData(Length, 0, data);
         }
 
         /// <summary>
@@ -53,7 +74,7 @@ namespace Redc.Browser.Dom
         [ES("deleteData")]
         public void DeleteData(int offset, int count)
         {
-            throw new System.NotImplementedException();
+            ReplaceData(offset, count, string.Empty);
         }
 
         /// <summary>
@@ -74,9 +95,19 @@ namespace Redc.Browser.Dom
         /// <param name="count"></param>
         /// <param name="data"></param>
         [ES("replaceData")]
-        public void ReplaceData(int offset, int count, int data)
+        public void ReplaceData(int offset, int count, string data)
         {
-            throw new System.NotImplementedException();
+            if (offset > Length)
+            {
+                throw new System.Exception();
+            }
+
+            if (offset + count > Length)
+            {
+                count = Length - offset;
+            }
+
+            // TODO Ranges and Mutation stuff
         }
 
         /// <summary>
@@ -88,7 +119,17 @@ namespace Redc.Browser.Dom
         [ES("substringData")]
         public string SubstringData(int offset, int count)
         {
-            throw new System.NotImplementedException();
+            if (offset > Length)
+            {
+                throw new System.Exception();
+            }
+
+            if (offset + count > Length)
+            {
+                return _data.Substring(offset);
+            }
+
+            return _data.Substring(offset, count);
         }
 
         #endregion

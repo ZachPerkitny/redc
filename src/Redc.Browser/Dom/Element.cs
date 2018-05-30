@@ -1,6 +1,6 @@
 ﻿using Redc.Browser.Attributes;
 using Redc.Browser.Dom.Collections;
-using Redc.Browser.Dom.Sets.Interfaces;
+using Redc.Browser.Dom.Sets;
 
 namespace Redc.Browser.Dom
 {
@@ -15,8 +15,14 @@ namespace Redc.Browser.Dom
         /// </summary>
         /// <param name="owner"></param>
         /// <param name="name"></param>
-        public Element(Document owner, string name)
-            : base(owner, name, NodeType.Element) { }
+        public Element(Document owner, string localName, string @namespace = null, string namespacePrefix = null)
+            : base(owner)
+        {
+            LocalName = localName;
+            NamespaceUri = @namespace;
+            Prefix = namespacePrefix;
+            Attributes = new NamedNodeMap();
+        }
 
         #region Public Properties
 
@@ -24,13 +30,13 @@ namespace Redc.Browser.Dom
         /// 
         /// </summary>
         [ES("namespaceURI")]
-        public string NamespaceUri { get; }
+        public string NamespaceUri { get; private set; }
 
         /// <summary>
         /// 
         /// </summary>
         [ES("prefix")]
-        public string Prefix { get; }
+        public string Prefix { get; private set; }
 
         /// <summary>
         /// 
@@ -42,7 +48,29 @@ namespace Redc.Browser.Dom
         /// 
         /// </summary>
         [ES("tagName")]
-        public string TagName { get; }
+        public string TagName
+        {
+            get
+            {
+                string qualifiedName;
+
+                if (!string.IsNullOrEmpty(Prefix))
+                {
+                    qualifiedName = $"{Prefix}:{LocalName}";
+                }
+                else
+                {
+                    qualifiedName = LocalName;
+                }
+
+                if (NamespaceUri == NamespaceUris.HtmlNamespace)
+                {
+                    qualifiedName = qualifiedName.ToUpper();
+                }
+
+                return qualifiedName;
+            }
+        }
 
         /// <summary>
         /// 
@@ -66,7 +94,23 @@ namespace Redc.Browser.Dom
         /// 
         /// </summary>
         [ES("attributes")]
-        public NamedNodeMap Attributes { get; }
+        public NamedNodeMap Attributes { get; private set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public override NodeType NodeType
+        {
+            get { return NodeType.Element; }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public override string NodeName
+        {
+            get { return TagName; }
+        }
 
         #endregion
 
@@ -80,7 +124,12 @@ namespace Redc.Browser.Dom
         [ES("getAttribute")]
         public string GetAttribute(string name)
         {
-            throw new System.NotImplementedException();
+            if (NamespaceUri == NamespaceUris.HtmlNamespace)
+            {
+                name = name.ToLower();
+            }
+
+            return Attributes.GetNamedItem(name)?.Value;
         }
 
         /// <summary>
@@ -92,15 +141,21 @@ namespace Redc.Browser.Dom
         [ES("getAttributeNS")]
         public string GetAttributeNS(string @namespace, string localName)
         {
-            throw new System.NotImplementedException();
+            if (@namespace == string.Empty)
+            {
+                @namespace = null;
+            }
+
+            return Attributes.GetNamedItemNS(@namespace, localName)?.Value;
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="name"></param>
+        /// <param name="value"></param>
         [ES("setAttribute")]
-        public void SetAttribute(string name)
+        public void SetAttribute(string name, string value)
         {
             throw new System.NotImplementedException();
         }

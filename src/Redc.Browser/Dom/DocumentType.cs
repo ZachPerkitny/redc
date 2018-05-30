@@ -13,8 +13,15 @@ namespace Redc.Browser.Dom
         /// </summary>
         /// <param name="owner"></param>
         /// <param name="name"></param>
-        public DocumentType(Document owner, string name)
-            : base(owner, name, NodeType.DocumentType) { }
+        /// <param name="publicID"></param>
+        /// <param name="systemID"></param>
+        public DocumentType(Document owner, string name, string publicID = "", string systemID = "")
+            : base(owner)
+        {
+            Name = name;
+            PublicID = publicID;
+            SystemID = systemID;
+        }
 
         /// <summary>
         /// 
@@ -33,5 +40,21 @@ namespace Redc.Browser.Dom
         /// </summary>
         [ES("systemId")]
         public string SystemID { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public override NodeType NodeType
+        {
+            get { return NodeType.DocumentType; }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public override string NodeName
+        {
+            get { return Name; }
+        }
     }
 }

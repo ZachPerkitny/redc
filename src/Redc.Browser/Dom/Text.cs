@@ -8,8 +8,31 @@ namespace Redc.Browser.Dom
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="owner"></param>
+        public Text(Document owner)
+            : base(owner) { }
+
+        /// <summary>
+        /// 
+        /// </summary>
         [ES("wholeText")]
         public string WholeText { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public override NodeType NodeType
+        {
+            get { return NodeType.Text; }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public override string NodeName
+        {
+            get { return "#text"; }
+        }
 
         /// <summary>
         /// 

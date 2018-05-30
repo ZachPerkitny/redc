@@ -3,7 +3,6 @@ using Redc.Browser.Dom.Collections;
 using Redc.Browser.Dom.Events;
 using Redc.Browser.Dom.Ranges;
 using Redc.Browser.Dom.Traversal;
-using Redc.Browser.Dom.Traversal.Interfaces;
 
 namespace Redc.Browser.Dom
 {
@@ -17,7 +16,7 @@ namespace Redc.Browser.Dom
         /// 
         /// </summary>
         public Document()
-            : base(null, "#document", NodeType.Document) { }
+            : base(null) { }
 
         #region Public Properties
 
@@ -74,6 +73,22 @@ namespace Redc.Browser.Dom
         /// </summary>
         [ES("documentElement")]
         public Element DocumentElement { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public override NodeType NodeType
+        {
+            get { return NodeType.Document; }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public override string NodeName
+        {
+            get { return "#document"; }
+        }
 
         #endregion
 

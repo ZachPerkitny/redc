@@ -37,7 +37,10 @@ namespace Redc.Browser.Dom.Collections
         [ES("length")]
         public int Length
         {
-            get { return _elements.Count; }
+            get
+            {
+                return _elements.Count;
+            }
         }
 
         /// <summary>
@@ -48,7 +51,10 @@ namespace Redc.Browser.Dom.Collections
         [ES("item")]
         public Element this[int index]
         {
-            get { return _elements[index]; }
+            get
+            {
+                return _elements[index];
+            }
         }
 
 

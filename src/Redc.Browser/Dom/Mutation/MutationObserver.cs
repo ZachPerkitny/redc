@@ -29,7 +29,7 @@ namespace Redc.Browser.Dom.Mutation
         [ES("observe")]
         void Observe(Node target, MutationObserverInit options)
         {
-
+            throw new System.NotImplementedException();
         }
 
         /// <summary>
@@ -38,7 +38,17 @@ namespace Redc.Browser.Dom.Mutation
         [ES("disconnect")]
         void Disconnect()
         {
+            throw new System.NotImplementedException();
+        }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        [ES("takeRecords")]
+        IEnumerable<MutationRecord> TakeRecords()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
-using Redc.Browser.Html.Constants;
 using Redc.Browser.Utils;
 
 namespace Redc.Browser.Html.Parser
@@ -1188,7 +1187,7 @@ namespace Redc.Browser.Html.Parser
                                 Advance(2);
                                 State = HtmlTokenizerState.CommentStartState;
                             }
-                            else if (string.Equals(Peek(7), HtmlTagNames.DOCTYPE, StringComparison.InvariantCultureIgnoreCase))
+                            else if (string.Equals(Peek(7), "DOCTYPE", StringComparison.InvariantCultureIgnoreCase))
                             {
                                 Advance(7);
                                 State = HtmlTokenizerState.DOCTYPEState;

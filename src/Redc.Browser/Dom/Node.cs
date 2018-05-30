@@ -17,13 +17,9 @@ namespace Redc.Browser.Dom
         /// 
         /// </summary>
         /// <param name="owner"></param>
-        /// <param name="nodeName"></param>
-        /// <param name="nodeType"></param>
-        public Node(Document owner, string nodeName, NodeType nodeType)
+        public Node(Document owner)
         {
             OwnerDocument = owner;
-            NodeType = nodeType;
-            NodeName = nodeName;
         }
 
         #endregion
@@ -34,13 +30,13 @@ namespace Redc.Browser.Dom
         /// The type of node
         /// </summary>
         [ES("nodeType")]
-        public NodeType NodeType { get; private set; }
+        public abstract NodeType NodeType { get; }
 
         /// <summary>
         /// The name of the node
         /// </summary>
         [ES("nodeName")]
-        public string NodeName { get; private set; }
+        public abstract string NodeName { get; }
 
         /// <summary>
         /// 
