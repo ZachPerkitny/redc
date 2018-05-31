@@ -177,6 +177,46 @@ namespace Redc.Browser.Dom
             get { return ChildNodes.Length; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public int Index
+        {
+            get
+            {
+                if (ParentNode != null)
+                {
+                    for (int i = 0; i < ParentNode.ChildNodes.Length; i++)
+                    {
+                        if (ReferenceEquals(this, ParentNode.ChildNodes[i]))
+                        {
+                            return i;
+                        }
+                    }
+                }
+
+                return -1;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public Node Root
+        {
+            get
+            {
+                if (ParentNode == null)
+                {
+                    return this;
+                }
+                else
+                {
+                    return ParentNode.Root;
+                }
+            }
+        }
+
         #endregion
 
         #region Public Methods
@@ -264,31 +304,7 @@ namespace Redc.Browser.Dom
         [ES("compareDocumentPosition")]
         public DocumentPosition CompareDocumentPosition(Node other)
         {
-            if (ReferenceEquals(this, other))
-            {
-                return DocumentPosition.None;
-            }
-            else if (!ReferenceEquals(OwnerDocument, other.OwnerDocument))
-            {
-                // TODO
-                return DocumentPosition.None;
-            }
-            else if (IsAncestorOf(other))
-            {
-                return DocumentPosition.Contains | DocumentPosition.Preceding;
-            }
-            else if (IsDescendantOf(other))
-            {
-                return DocumentPosition.ContainedBy | DocumentPosition.Following;
-            }
-            else if (IsPreceding(other))
-            {
-                return DocumentPosition.Preceding;
-            }
-            else
-            {
-                return DocumentPosition.Following;
-            }
+            throw new NotImplementedException();
         }
 
         /// <summary>

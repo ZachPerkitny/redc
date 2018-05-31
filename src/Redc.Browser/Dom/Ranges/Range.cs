@@ -88,6 +88,17 @@ namespace Redc.Browser.Dom.Ranges
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public Node Root
+        {
+            get
+            {
+                return _start.Node.Root;
+            }
+        }
+
         #endregion
 
         #region Public Methods
@@ -128,7 +139,7 @@ namespace Redc.Browser.Dom.Ranges
                 throw new Exception();
             }
 
-            //SetBoundary(parent, , true);
+            SetBoundary(parent, node.Index, true);
         }
         
         /// <summary>
@@ -145,7 +156,7 @@ namespace Redc.Browser.Dom.Ranges
                 throw new Exception();
             }
 
-            //SetBoundary(parent, , true); 
+            SetBoundary(parent, node.Index + 1, true); 
         }
 
         /// <summary>
@@ -162,7 +173,7 @@ namespace Redc.Browser.Dom.Ranges
                 throw new Exception();
             }
 
-            //SetBoundary(parent, , false);
+            SetBoundary(parent, node.Index, false);
         }
 
         /// <summary>
@@ -179,7 +190,7 @@ namespace Redc.Browser.Dom.Ranges
                 throw new Exception();
             }
 
-            //SetBoundary(parent, , false);
+            SetBoundary(parent, node.Index + 1, false);
         }
 
         /// <summary>
@@ -189,7 +200,14 @@ namespace Redc.Browser.Dom.Ranges
         [ES("collapse")]
         public void Collapse(bool toStart = false)
         {
-            throw new System.NotImplementedException();
+            if (toStart)
+            {
+                _end = _start;
+            }
+            else
+            {
+                _start = _end;
+            }
         }
         
         /// <summary>
@@ -199,7 +217,17 @@ namespace Redc.Browser.Dom.Ranges
         [ES("selectNode")]
         public void SelectNode(Node node)
         {
-            throw new System.NotImplementedException();
+            Node parent = node.ParentNode;
+
+            if (node == null)
+            {
+                throw new Exception();
+            }
+
+            int index = node.Index;
+
+            _start = new Boundary { Node = parent, Offset = index };
+            _end = new Boundary { Node = parent, Offset = index + 1 };
         }
         
         /// <summary>
@@ -209,7 +237,15 @@ namespace Redc.Browser.Dom.Ranges
         [ES("selectNodeContents")]
         public void SelectNodeContents(Node node)
         {
-            throw new System.NotImplementedException();
+            if (node.NodeType == NodeType.DocumentType)
+            {
+                throw new Exception();
+            }
+
+            int length = node.Length;
+
+            _start = new Boundary { Node = node, Offset = 0 };
+            _end = new Boundary { Node = node, Offset = length };
         }
         
         /// <summary>
@@ -221,7 +257,48 @@ namespace Redc.Browser.Dom.Ranges
         [ES("compareBoundaryPoints")]
         public short CompareBoundaryPoints(RangeType how, Range sourceRange)
         {
-            throw new System.NotImplementedException();
+            if (Root != sourceRange.Root)
+            {
+                throw new Exception();
+            }
+
+            Boundary thisPoint;
+            Boundary otherPoint;
+
+            switch (how)
+            {
+                case RangeType.StartToStart:
+                    thisPoint = _start;
+                    otherPoint = sourceRange._start;
+                    break;
+                case RangeType.StartToEnd:
+                    thisPoint = _end;
+                    otherPoint = sourceRange._start;
+                    break;
+                case RangeType.EndToEnd:
+                    thisPoint = _end;
+                    otherPoint = sourceRange._end;
+                    break;
+                case RangeType.EndToStart:
+                    thisPoint = _start;
+                    otherPoint = sourceRange._end;
+                    break;
+                default:
+                    throw new Exception();
+            }
+
+            if (thisPoint < otherPoint)
+            {
+                return -1;
+            }
+            else if (thisPoint > otherPoint)
+            {
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
         }
         
         /// <summary>

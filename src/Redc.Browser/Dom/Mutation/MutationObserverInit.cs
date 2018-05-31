@@ -15,7 +15,7 @@ namespace Redc.Browser.Dom.Mutation
 
         public bool Subtree { get; set; } = false;
 
-        public bool? AtributeOldValue { get; set; }
+        public bool? AttributeOldValue { get; set; }
 
         public bool? CharacterDataOldValue { get; set; }
 

@@ -10,6 +10,7 @@ namespace Redc.Browser.Dom.Mutation
     public class MutationObserver
     {
         private readonly MutationCallback _callback;
+        private readonly Queue<MutationRecord> _recordQueue;
 
         /// <summary>
         /// 
@@ -19,6 +20,7 @@ namespace Redc.Browser.Dom.Mutation
         public MutationObserver(MutationCallback callback)
         {
             _callback = callback;
+            _recordQueue = new Queue<MutationRecord>();
         }
 
         /// <summary>
@@ -27,16 +29,44 @@ namespace Redc.Browser.Dom.Mutation
         /// <param name="target"></param>
         /// <param name="options"></param>
         [ES("observe")]
-        void Observe(Node target, MutationObserverInit options)
+        public void Observe(Node target, MutationObserverInit options)
         {
-            throw new System.NotImplementedException();
+            if ((options.AttributeOldValue != null || options.AttributeFilter != null) && options.Attributes == null)
+            {
+                options.Attributes = true;
+            }
+
+            if (options.CharacterDataOldValue != null && options.CharacterData == null)
+            {
+                options.CharacterData = true;
+            }
+
+            if (options.ChildList == false&& options.CharacterData == false)
+            {
+                throw new System.Exception();
+            }
+
+            if (options.AttributeOldValue == true && options.Attributes == false)
+            {
+                throw new System.Exception();
+            }
+
+            if (options.AttributeFilter != null && options.Attributes == false)
+            {
+                throw new System.Exception();
+            }
+
+            if (options.CharacterDataOldValue == true && options.CharacterData == false)
+            {
+                throw new System.Exception();
+            }
         }
 
         /// <summary>
         /// 
         /// </summary>
         [ES("disconnect")]
-        void Disconnect()
+        public void Disconnect()
         {
             throw new System.NotImplementedException();
         }
@@ -46,7 +76,7 @@ namespace Redc.Browser.Dom.Mutation
         /// </summary>
         /// <returns></returns>
         [ES("takeRecords")]
-        IEnumerable<MutationRecord> TakeRecords()
+        public IEnumerable<MutationRecord> TakeRecords()
         {
             throw new System.NotImplementedException();
         }
